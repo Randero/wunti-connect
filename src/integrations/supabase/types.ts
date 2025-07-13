@@ -87,25 +87,31 @@ export type Database = {
           created_at: string
           email: string
           id: string
+          ip_address: unknown | null
           message: string
           name: string
           phone: string | null
+          user_agent: string | null
         }
         Insert: {
           created_at?: string
           email: string
           id?: string
+          ip_address?: unknown | null
           message: string
           name: string
           phone?: string | null
+          user_agent?: string | null
         }
         Update: {
           created_at?: string
           email?: string
           id?: string
+          ip_address?: unknown | null
           message?: string
           name?: string
           phone?: string | null
+          user_agent?: string | null
         }
         Relationships: []
       }
@@ -186,12 +192,56 @@ export type Database = {
         }
         Relationships: []
       }
+      rate_limit_contact: {
+        Row: {
+          ip_address: unknown
+          last_submission: string | null
+          reset_time: string | null
+          submission_count: number | null
+        }
+        Insert: {
+          ip_address: unknown
+          last_submission?: string | null
+          reset_time?: string | null
+          submission_count?: number | null
+        }
+        Update: {
+          ip_address?: unknown
+          last_submission?: string | null
+          reset_time?: string | null
+          submission_count?: number | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      check_contact_rate_limit: {
+        Args: { client_ip: unknown }
+        Returns: boolean
+      }
+      get_current_user_role: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
+      is_admin: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
+      is_admin_or_manager: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
+      is_valid_email: {
+        Args: { email: string }
+        Returns: boolean
+      }
+      sanitize_html: {
+        Args: { input_text: string }
+        Returns: string
+      }
     }
     Enums: {
       [_ in never]: never

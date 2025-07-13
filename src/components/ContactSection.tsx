@@ -29,27 +29,100 @@ const ContactSection = () => {
     });
   };
 
+  // Client-side input validation
+  const validateInput = () => {
+    const errors: string[] = [];
+    
+    // Name validation
+    if (!formData.name.trim() || formData.name.length < 2 || formData.name.length > 100) {
+      errors.push("Name must be between 2 and 100 characters");
+    }
+    
+    // Email validation
+    const emailRegex = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
+    if (!emailRegex.test(formData.email)) {
+      errors.push("Please enter a valid email address");
+    }
+    
+    // Phone validation (if provided)
+    if (formData.phone && !/^[\+]?[0-9\-\(\)\s]{7,20}$/.test(formData.phone)) {
+      errors.push("Please enter a valid phone number");
+    }
+    
+    // Message validation
+    if (!formData.message.trim() || formData.message.length < 10 || formData.message.length > 2000) {
+      errors.push("Message must be between 10 and 2000 characters");
+    }
+    
+    // Check for potentially malicious content
+    const suspiciousPatterns = [
+      /<script[^>]*>/i,
+      /javascript:/i,
+      /on\w+\s*=/i,
+      /<iframe[^>]*>/i,
+      /<object[^>]*>/i,
+      /<embed[^>]*>/i
+    ];
+    
+    const allText = `${formData.name} ${formData.email} ${formData.message}`;
+    for (const pattern of suspiciousPatterns) {
+      if (pattern.test(allText)) {
+        errors.push("Your message contains invalid characters. Please remove any HTML or scripts.");
+        break;
+      }
+    }
+    
+    return errors;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      // Save to database
+      // Client-side validation
+      const validationErrors = validateInput();
+      if (validationErrors.length > 0) {
+        toast({
+          title: "Validation Error",
+          description: validationErrors[0],
+          variant: "destructive",
+        });
+        setLoading(false);
+        return;
+      }
+
+      // Sanitize inputs (basic client-side sanitization)
+      const sanitizedData = {
+        name: formData.name.trim().substring(0, 100),
+        email: formData.email.trim().toLowerCase().substring(0, 254),
+        phone: formData.phone ? formData.phone.trim().substring(0, 20) : null,
+        message: formData.message.trim().substring(0, 2000)
+      };
+
+      // Save to database with rate limiting check
       const { error } = await supabase
         .from('contact_submissions')
         .insert({
-          name: formData.name,
-          email: formData.email,
-          phone: formData.phone,
-          message: formData.message
+          ...sanitizedData,
+          ip_address: null, // Will be handled server-side
+          user_agent: navigator.userAgent.substring(0, 500) // Limit user agent length
         });
 
       if (error) {
+        // Check if it's a rate limiting error
+        if (error.message.includes('rate limit') || error.message.includes('too many')) {
+          toast({
+            title: "Rate Limit Exceeded",
+            description: "You've submitted too many messages recently. Please wait before trying again.",
+            variant: "destructive",
+          });
+          setLoading(false);
+          return;
+        }
         throw error;
       }
 
-      // TODO: Send email notification to admin (will implement edge function later)
-      
       toast({
         title: "Message Sent!",
         description: "Thank you for reaching out. We'll get back to you soon.",
@@ -64,9 +137,25 @@ const ContactSection = () => {
       });
     } catch (error: any) {
       console.error('Error submitting contact form:', error);
+      
+      // Don't expose internal errors to users
+      let errorMessage = "Failed to send message. Please try again.";
+      
+      if (error.message.includes('constraint')) {
+        if (error.message.includes('email')) {
+          errorMessage = "Please enter a valid email address.";
+        } else if (error.message.includes('name_length')) {
+          errorMessage = "Name must be between 2 and 100 characters.";
+        } else if (error.message.includes('message_length')) {
+          errorMessage = "Message must be between 10 and 2000 characters.";
+        } else if (error.message.includes('phone_format')) {
+          errorMessage = "Please enter a valid phone number.";
+        }
+      }
+      
       toast({
         title: "Error",
-        description: "Failed to send message. Please try again.",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
