@@ -91,6 +91,7 @@ export type Database = {
           message: string
           name: string
           phone: string | null
+          status: string | null
           user_agent: string | null
         }
         Insert: {
@@ -101,6 +102,7 @@ export type Database = {
           message: string
           name: string
           phone?: string | null
+          status?: string | null
           user_agent?: string | null
         }
         Update: {
@@ -111,6 +113,7 @@ export type Database = {
           message?: string
           name?: string
           phone?: string | null
+          status?: string | null
           user_agent?: string | null
         }
         Relationships: []
@@ -237,6 +240,10 @@ export type Database = {
       is_valid_email: {
         Args: { email: string }
         Returns: boolean
+      }
+      request_password_reset: {
+        Args: { user_email: string }
+        Returns: Json
       }
       sanitize_html: {
         Args: { input_text: string }

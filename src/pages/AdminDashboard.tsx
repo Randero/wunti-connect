@@ -9,9 +9,12 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { UserDetailsModal } from '@/components/UserDetailsModal';
+import { AddUserModal } from '@/components/AddUserModal';
 import { 
   Shield, 
   Users, 
@@ -60,6 +63,7 @@ interface ContactSubmission {
   phone?: string;
   message: string;
   created_at: string;
+  status: 'pending' | 'in_progress' | 'resolved' | 'closed';
 }
 
 interface GalleryImage {
@@ -80,7 +84,20 @@ const AdminDashboard = () => {
   const [galleryImages, setGalleryImages] = useState<GalleryImage[]>([]);
   const [users, setUsers] = useState<User[]>([]);
   const [contactSubmissions, setContactSubmissions] = useState<ContactSubmission[]>([]);
+  const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
+  const [filteredSubmissions, setFilteredSubmissions] = useState<ContactSubmission[]>([]);
   const [loading, setLoading] = useState(false);
+  
+  // Search and filter state
+  const [userSearchTerm, setUserSearchTerm] = useState('');
+  const [submissionSearchTerm, setSubmissionSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [roleFilter, setRoleFilter] = useState('all');
+  
+  // Modal state
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [showUserDetails, setShowUserDetails] = useState(false);
+  const [showAddUser, setShowAddUser] = useState(false);
   
   // New image form state
   const [newImageUrl, setNewImageUrl] = useState('');
@@ -108,6 +125,43 @@ const AdminDashboard = () => {
       fetchAllData();
     }
   }, [user, isAdmin]);
+
+  // Filter users based on search and role
+  useEffect(() => {
+    let filtered = users;
+    
+    if (userSearchTerm) {
+      filtered = filtered.filter(user => 
+        user.full_name?.toLowerCase().includes(userSearchTerm.toLowerCase()) ||
+        user.email?.toLowerCase().includes(userSearchTerm.toLowerCase())
+      );
+    }
+    
+    if (roleFilter !== 'all') {
+      filtered = filtered.filter(user => user.role === roleFilter);
+    }
+    
+    setFilteredUsers(filtered);
+  }, [users, userSearchTerm, roleFilter]);
+
+  // Filter contact submissions based on search and status
+  useEffect(() => {
+    let filtered = contactSubmissions;
+    
+    if (submissionSearchTerm) {
+      filtered = filtered.filter(submission => 
+        submission.name?.toLowerCase().includes(submissionSearchTerm.toLowerCase()) ||
+        submission.email?.toLowerCase().includes(submissionSearchTerm.toLowerCase()) ||
+        submission.message?.toLowerCase().includes(submissionSearchTerm.toLowerCase())
+      );
+    }
+    
+    if (statusFilter !== 'all') {
+      filtered = filtered.filter(submission => submission.status === statusFilter);
+    }
+    
+    setFilteredSubmissions(filtered);
+  }, [contactSubmissions, submissionSearchTerm, statusFilter]);
 
   const fetchAllData = async () => {
     await Promise.all([
@@ -156,7 +210,10 @@ const AdminDashboard = () => {
 
       if (error) throw error;
       
-      const submissions = data || [];
+      const submissions = (data || []).map(submission => ({
+        ...submission,
+        status: submission.status as 'pending' | 'in_progress' | 'resolved' | 'closed' || 'pending'
+      }));
       setContactSubmissions(submissions);
       
       setAnalytics(prev => ({
@@ -285,6 +342,7 @@ const AdminDashboard = () => {
       });
 
       fetchUsers();
+      setShowUserDetails(false);
     } catch (error: any) {
       toast({
         title: "Error",
@@ -292,6 +350,35 @@ const AdminDashboard = () => {
         variant: "destructive",
       });
     }
+  };
+
+  const updateSubmissionStatus = async (submissionId: string, newStatus: string) => {
+    try {
+      const { error } = await supabase
+        .from('contact_submissions')
+        .update({ status: newStatus })
+        .eq('id', submissionId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Status Updated",
+        description: `Request status updated to ${newStatus}.`,
+      });
+
+      fetchContactSubmissions();
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleViewUser = (user: User) => {
+    setSelectedUser(user);
+    setShowUserDetails(true);
   };
 
   const deleteUser = async (userId: string) => {
@@ -530,97 +617,162 @@ const AdminDashboard = () => {
 
             {/* Enhanced User Management */}
             <TabsContent value="users">
-              <Card className="bg-card/50 backdrop-blur-sm border-border/50">
-                <CardHeader>
-                  <CardTitle className="flex items-center justify-between">
-                    <div className="flex items-center">
-                      <Users className="w-5 h-5 mr-2 text-primary" />
-                      User Management
+              <div className="space-y-6">
+                {/* User Management Header */}
+                <Card className="bg-card/50 backdrop-blur-sm border-border/50">
+                  <CardHeader>
+                    <CardTitle className="flex items-center justify-between">
+                      <div className="flex items-center">
+                        <Users className="w-5 h-5 mr-2 text-primary" />
+                        User Management
+                      </div>
+                      <div className="flex items-center space-x-3">
+                        <Badge variant="outline">{filteredUsers.length} of {users.length} Users</Badge>
+                        <Button
+                          onClick={() => setShowAddUser(true)}
+                          className="bg-primary hover:bg-primary/90"
+                        >
+                          <Plus className="w-4 h-4 mr-2" />
+                          Add User
+                        </Button>
+                      </div>
+                    </CardTitle>
+                    <CardDescription>
+                      Manage user accounts, roles, and permissions with advanced search and filtering
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex flex-col md:flex-row gap-4 mb-6">
+                      <div className="flex-1">
+                        <Input
+                          placeholder="Search users by name or email..."
+                          value={userSearchTerm}
+                          onChange={(e) => setUserSearchTerm(e.target.value)}
+                          className="bg-background/50 border-border"
+                        />
+                      </div>
+                      <Select value={roleFilter} onValueChange={setRoleFilter}>
+                        <SelectTrigger className="w-full md:w-48 bg-background/50 border-border">
+                          <SelectValue placeholder="Filter by role" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">All Roles</SelectItem>
+                          <SelectItem value="admin">Admin</SelectItem>
+                          <SelectItem value="manager">Manager</SelectItem>
+                          <SelectItem value="moderator">Moderator</SelectItem>
+                          <SelectItem value="user">User</SelectItem>
+                        </SelectContent>
+                      </Select>
                     </div>
-                    <Badge variant="outline">{users.length} Total Users</Badge>
-                  </CardTitle>
-                  <CardDescription>
-                    Manage user accounts, roles, and permissions
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="overflow-x-auto">
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>User</TableHead>
-                          <TableHead>Email</TableHead>
-                          <TableHead>Role</TableHead>
-                          <TableHead>Joined</TableHead>
-                          <TableHead>Actions</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        <AnimatePresence>
-                          {users.map((user, index) => (
-                            <motion.tr
-                              key={user.id}
-                              initial={{ opacity: 0, x: -20 }}
-                              animate={{ opacity: 1, x: 0 }}
-                              exit={{ opacity: 0, x: 20 }}
-                              transition={{ delay: index * 0.05 }}
-                              className="group hover:bg-muted/50"
-                            >
-                              <TableCell>
-                                <div className="flex items-center space-x-3">
-                                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
-                                    <span className="text-primary-foreground font-semibold text-sm">
-                                      {user.full_name?.charAt(0) || user.email?.charAt(0)}
-                                    </span>
+                  </CardContent>
+                </Card>
+
+                {/* User Management Table */}
+                <Card className="bg-card/50 backdrop-blur-sm border-border/50">
+                  <CardContent className="p-0">
+                    <div className="overflow-x-auto">
+                      <Table>
+                        <TableHeader>
+                          <TableRow className="border-border/50">
+                            <TableHead className="font-semibold">User</TableHead>
+                            <TableHead className="font-semibold">Email</TableHead>
+                            <TableHead className="font-semibold">Role</TableHead>
+                            <TableHead className="font-semibold">Status</TableHead>
+                            <TableHead className="font-semibold">Joined</TableHead>
+                            <TableHead className="font-semibold text-center">Actions</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          <AnimatePresence>
+                            {filteredUsers.map((user, index) => (
+                              <motion.tr
+                                key={user.id}
+                                initial={{ opacity: 0, x: -20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                exit={{ opacity: 0, x: 20 }}
+                                transition={{ delay: index * 0.02 }}
+                                className="group hover:bg-muted/30 border-border/30"
+                              >
+                                <TableCell className="py-4">
+                                  <div className="flex items-center space-x-3">
+                                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white font-bold">
+                                      {user.full_name?.charAt(0).toUpperCase() || user.email?.charAt(0).toUpperCase()}
+                                    </div>
+                                    <div>
+                                      <p className="font-semibold text-foreground">{user.full_name || 'Unnamed User'}</p>
+                                      <p className="text-sm text-muted-foreground">ID: {user.user_id.slice(0, 8)}...</p>
+                                    </div>
                                   </div>
-                                  <div>
-                                    <p className="font-medium">{user.full_name || 'No name'}</p>
-                                    <p className="text-sm text-muted-foreground">ID: {user.user_id.slice(0, 8)}...</p>
+                                </TableCell>
+                                <TableCell className="text-muted-foreground font-medium">{user.email}</TableCell>
+                                <TableCell>
+                                  <Badge 
+                                    variant={user.role === 'admin' ? 'destructive' : user.role === 'manager' ? 'default' : 'secondary'}
+                                    className="capitalize"
+                                  >
+                                    {user.role}
+                                  </Badge>
+                                </TableCell>
+                                <TableCell>
+                                  <Badge variant="secondary" className="bg-green-100 text-green-800 border-green-200">
+                                    <CheckCircle className="w-3 h-3 mr-1" />
+                                    Active
+                                  </Badge>
+                                </TableCell>
+                                <TableCell className="text-muted-foreground">
+                                  {new Date(user.created_at).toLocaleDateString('en-US', {
+                                    year: 'numeric',
+                                    month: 'short',
+                                    day: 'numeric'
+                                  })}
+                                </TableCell>
+                                <TableCell>
+                                  <div className="flex items-center justify-center space-x-2">
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      onClick={() => handleViewUser(user)}
+                                      className="opacity-0 group-hover:opacity-100 transition-all duration-200 hover:bg-primary hover:text-primary-foreground"
+                                    >
+                                      <Eye className="w-3 h-3" />
+                                    </Button>
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      onClick={() => deleteUser(user.user_id)}
+                                      className="opacity-0 group-hover:opacity-100 transition-all duration-200 text-destructive hover:text-destructive-foreground hover:bg-destructive border-destructive/50"
+                                    >
+                                      <Trash2 className="w-3 h-3" />
+                                    </Button>
                                   </div>
-                                </div>
-                              </TableCell>
-                              <TableCell className="text-muted-foreground">{user.email}</TableCell>
-                              <TableCell>
-                                <select
-                                  value={user.role}
-                                  onChange={(e) => updateUserRole(user.user_id, e.target.value)}
-                                  className="bg-background border border-border rounded px-2 py-1 text-sm"
-                                >
-                                  <option value="user">User</option>
-                                  <option value="admin">Admin</option>
-                                  <option value="manager">Manager</option>
-                                </select>
-                              </TableCell>
-                              <TableCell className="text-muted-foreground">
-                                {new Date(user.created_at).toLocaleDateString()}
-                              </TableCell>
-                              <TableCell>
-                                <div className="flex items-center space-x-2">
-                                  <Button
-                                    size="sm"
-                                    variant="outline"
-                                    className="opacity-0 group-hover:opacity-100 transition-opacity"
-                                  >
-                                    <Eye className="w-3 h-3" />
-                                  </Button>
-                                  <Button
-                                    size="sm"
-                                    variant="outline"
-                                    onClick={() => deleteUser(user.user_id)}
-                                    className="opacity-0 group-hover:opacity-100 transition-opacity text-destructive hover:text-destructive-foreground hover:bg-destructive"
-                                  >
-                                    <Trash2 className="w-3 h-3" />
-                                  </Button>
-                                </div>
-                              </TableCell>
-                            </motion.tr>
-                          ))}
-                        </AnimatePresence>
-                      </TableBody>
-                    </Table>
-                  </div>
-                </CardContent>
-              </Card>
+                                </TableCell>
+                              </motion.tr>
+                            ))}
+                          </AnimatePresence>
+                        </TableBody>
+                      </Table>
+                    </div>
+                    
+                    {filteredUsers.length === 0 && (
+                      <div className="text-center py-12">
+                        <Users className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                        <h3 className="font-semibold text-lg mb-2">No users found</h3>
+                        <p className="text-muted-foreground mb-4">
+                          {userSearchTerm || roleFilter !== 'all' 
+                            ? 'Try adjusting your search or filter criteria.' 
+                            : 'No users have been added yet.'}
+                        </p>
+                        {(!userSearchTerm && roleFilter === 'all') && (
+                          <Button onClick={() => setShowAddUser(true)}>
+                            <Plus className="w-4 h-4 mr-2" />
+                            Add First User
+                          </Button>
+                        )}
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </div>
             </TabsContent>
 
             {/* Enhanced Gallery Management */}
@@ -731,70 +883,218 @@ const AdminDashboard = () => {
               </div>
             </TabsContent>
 
-            {/* Enhanced Contact Messages */}
+            {/* Enhanced Contact Messages & User Requests */}
             <TabsContent value="messages">
-              <Card className="bg-card/50 backdrop-blur-sm border-border/50">
-                <CardHeader>
-                  <CardTitle className="flex items-center justify-between">
-                    <div className="flex items-center">
-                      <MessageSquare className="w-5 h-5 mr-2 text-primary" />
-                      Contact Messages
+              <div className="space-y-6">
+                {/* Request Management Header */}
+                <Card className="bg-card/50 backdrop-blur-sm border-border/50">
+                  <CardHeader>
+                    <CardTitle className="flex items-center justify-between">
+                      <div className="flex items-center">
+                        <MessageSquare className="w-5 h-5 mr-2 text-primary" />
+                        User Requests & Contact Messages
+                      </div>
+                      <div className="flex items-center space-x-3">
+                        <Badge variant="outline">{filteredSubmissions.length} of {contactSubmissions.length} Requests</Badge>
+                      </div>
+                    </CardTitle>
+                    <CardDescription>
+                      Process and manage user requests with status tracking and advanced filtering
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex flex-col md:flex-row gap-4 mb-6">
+                      <div className="flex-1">
+                        <Input
+                          placeholder="Search requests by name, email, or message content..."
+                          value={submissionSearchTerm}
+                          onChange={(e) => setSubmissionSearchTerm(e.target.value)}
+                          className="bg-background/50 border-border"
+                        />
+                      </div>
+                      <Select value={statusFilter} onValueChange={setStatusFilter}>
+                        <SelectTrigger className="w-full md:w-48 bg-background/50 border-border">
+                          <SelectValue placeholder="Filter by status" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">All Status</SelectItem>
+                          <SelectItem value="pending">Pending</SelectItem>
+                          <SelectItem value="in_progress">In Progress</SelectItem>
+                          <SelectItem value="resolved">Resolved</SelectItem>
+                          <SelectItem value="closed">Closed</SelectItem>
+                        </SelectContent>
+                      </Select>
                     </div>
-                    <Badge variant="outline">{contactSubmissions.length} Messages</Badge>
-                  </CardTitle>
-                  <CardDescription>
-                    View and manage messages from visitors
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <AnimatePresence>
-                      {contactSubmissions.map((submission, index) => (
-                        <motion.div
-                          key={submission.id}
-                          initial={{ opacity: 0, y: 20 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0, y: -20 }}
-                          transition={{ delay: index * 0.05 }}
-                          className="p-6 bg-background/50 rounded-lg border border-border hover:bg-background/80 transition-colors"
-                        >
-                          <div className="flex justify-between items-start mb-4">
-                            <div className="flex items-center space-x-3">
-                              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
-                                <span className="text-primary-foreground font-semibold text-sm">
-                                  {submission.name.charAt(0)}
-                                </span>
+                  </CardContent>
+                </Card>
+
+                {/* Request Cards */}
+                <div className="space-y-4">
+                  <AnimatePresence>
+                    {filteredSubmissions.map((submission, index) => (
+                      <motion.div
+                        key={submission.id}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -20 }}
+                        transition={{ delay: index * 0.02 }}
+                      >
+                        <Card className="bg-card/50 backdrop-blur-sm border-border/50 hover:bg-card/80 transition-all duration-200 hover:shadow-lg">
+                          <CardContent className="p-6">
+                            <div className="flex justify-between items-start mb-4">
+                              <div className="flex items-center space-x-4">
+                                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white font-bold">
+                                  {submission.name.charAt(0).toUpperCase()}
+                                </div>
+                                <div>
+                                  <h4 className="font-semibold text-foreground text-lg">{submission.name}</h4>
+                                  <div className="flex items-center space-x-2 text-sm text-muted-foreground">
+                                    <Mail className="w-3 h-3" />
+                                    <span>{submission.email}</span>
+                                  </div>
+                                  {submission.phone && (
+                                    <div className="flex items-center space-x-2 text-sm text-muted-foreground">
+                                      <span>📞</span>
+                                      <span>{submission.phone}</span>
+                                    </div>
+                                  )}
+                                </div>
                               </div>
-                              <div>
-                                <h4 className="font-medium text-foreground">{submission.name}</h4>
-                                <p className="text-sm text-muted-foreground">{submission.email}</p>
-                                {submission.phone && (
-                                  <p className="text-sm text-muted-foreground">{submission.phone}</p>
-                                )}
+                              <div className="flex flex-col items-end space-y-2">
+                                <Select
+                                  value={submission.status}
+                                  onValueChange={(value) => updateSubmissionStatus(submission.id, value)}
+                                >
+                                  <SelectTrigger className="w-32 bg-background border-border">
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="pending">
+                                      <div className="flex items-center space-x-2">
+                                        <Clock className="w-3 h-3 text-yellow-500" />
+                                        <span>Pending</span>
+                                      </div>
+                                    </SelectItem>
+                                    <SelectItem value="in_progress">
+                                      <div className="flex items-center space-x-2">
+                                        <Activity className="w-3 h-3 text-blue-500" />
+                                        <span>In Progress</span>
+                                      </div>
+                                    </SelectItem>
+                                    <SelectItem value="resolved">
+                                      <div className="flex items-center space-x-2">
+                                        <CheckCircle className="w-3 h-3 text-green-500" />
+                                        <span>Resolved</span>
+                                      </div>
+                                    </SelectItem>
+                                    <SelectItem value="closed">
+                                      <div className="flex items-center space-x-2">
+                                        <XCircle className="w-3 h-3 text-gray-500" />
+                                        <span>Closed</span>
+                                      </div>
+                                    </SelectItem>
+                                  </SelectContent>
+                                </Select>
+                                <div className="text-right">
+                                  <div className="flex items-center text-xs text-muted-foreground mb-1">
+                                    <Calendar className="w-3 h-3 mr-1" />
+                                    {new Date(submission.created_at).toLocaleDateString('en-US', {
+                                      year: 'numeric',
+                                      month: 'short',
+                                      day: 'numeric'
+                                    })}
+                                  </div>
+                                  <div className="text-xs text-muted-foreground">
+                                    {new Date(submission.created_at).toLocaleTimeString('en-US', {
+                                      hour: '2-digit',
+                                      minute: '2-digit'
+                                    })}
+                                  </div>
+                                </div>
                               </div>
                             </div>
-                            <div className="text-right">
-                              <Badge variant="outline" className="mb-2">
-                                <Calendar className="w-3 h-3 mr-1" />
-                                {new Date(submission.created_at).toLocaleDateString()}
+                            <div className="bg-muted/30 rounded-lg p-4 border border-border/50">
+                              <h5 className="font-medium text-foreground mb-2">Message:</h5>
+                              <p className="text-foreground leading-relaxed">{submission.message}</p>
+                            </div>
+                            <div className="flex justify-between items-center mt-4 pt-4 border-t border-border/50">
+                              <Badge 
+                                variant={
+                                  submission.status === 'pending' ? 'secondary' :
+                                  submission.status === 'in_progress' ? 'default' :
+                                  submission.status === 'resolved' ? 'secondary' : 'outline'
+                                }
+                                className={
+                                  submission.status === 'pending' ? 'bg-yellow-100 text-yellow-800 border-yellow-200' :
+                                  submission.status === 'in_progress' ? 'bg-blue-100 text-blue-800 border-blue-200' :
+                                  submission.status === 'resolved' ? 'bg-green-100 text-green-800 border-green-200' : 
+                                  'bg-gray-100 text-gray-800 border-gray-200'
+                                }
+                              >
+                                {submission.status === 'pending' && <Clock className="w-3 h-3 mr-1" />}
+                                {submission.status === 'in_progress' && <Activity className="w-3 h-3 mr-1" />}
+                                {submission.status === 'resolved' && <CheckCircle className="w-3 h-3 mr-1" />}
+                                {submission.status === 'closed' && <XCircle className="w-3 h-3 mr-1" />}
+                                <span className="capitalize">{submission.status.replace('_', ' ')}</span>
                               </Badge>
-                              <p className="text-xs text-muted-foreground">
-                                {new Date(submission.created_at).toLocaleTimeString()}
-                              </p>
+                              <div className="flex items-center space-x-2">
+                                <Button size="sm" variant="outline">
+                                  <Mail className="w-3 h-3 mr-1" />
+                                  Reply
+                                </Button>
+                                <Button size="sm" variant="outline">
+                                  <Eye className="w-3 h-3 mr-1" />
+                                  Details
+                                </Button>
+                              </div>
                             </div>
-                          </div>
-                          <div className="bg-muted/30 rounded-lg p-4">
-                            <p className="text-foreground leading-relaxed">{submission.message}</p>
-                          </div>
-                        </motion.div>
-                      ))}
-                    </AnimatePresence>
-                  </div>
-                </CardContent>
-              </Card>
+                          </CardContent>
+                        </Card>
+                      </motion.div>
+                    ))}
+                  </AnimatePresence>
+                </div>
+
+                {filteredSubmissions.length === 0 && (
+                  <Card className="bg-card/50 backdrop-blur-sm border-border/50">
+                    <CardContent className="text-center py-12">
+                      <MessageSquare className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                      <h3 className="font-semibold text-lg mb-2">No requests found</h3>
+                      <p className="text-muted-foreground">
+                        {submissionSearchTerm || statusFilter !== 'all' 
+                          ? 'Try adjusting your search or filter criteria.' 
+                          : 'No user requests have been received yet.'}
+                      </p>
+                    </CardContent>
+                  </Card>
+                )}
+              </div>
             </TabsContent>
           </Tabs>
         </motion.div>
+
+        {/* User Details Modal */}
+        {selectedUser && (
+          <UserDetailsModal
+            user={selectedUser}
+            isOpen={showUserDetails}
+            onClose={() => {
+              setShowUserDetails(false);
+              setSelectedUser(null);
+            }}
+            onRoleUpdate={updateUserRole}
+          />
+        )}
+
+        {/* Add User Modal */}
+        <AddUserModal
+          isOpen={showAddUser}
+          onClose={() => setShowAddUser(false)}
+          onUserAdded={() => {
+            fetchUsers();
+            setShowAddUser(false);
+          }}
+        />
       </div>
     </div>
   );
