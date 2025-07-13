@@ -42,7 +42,6 @@ const Dashboard = () => {
   const { user, userProfile, signOut, loading: authLoading } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
-  const [userPosts, setUserPosts] = useState<any[]>([]);
   const [galleryImages, setGalleryImages] = useState<any[]>([]);
   const [selectedImages, setSelectedImages] = useState<any[]>([]);
   const [selectedPlatform, setSelectedPlatform] = useState<string>('');
@@ -66,60 +65,11 @@ const Dashboard = () => {
 
   useEffect(() => {
     if (user) {
-      fetchUserPosts();
       fetchGalleryImages();
-      calculateAnalytics();
     }
   }, [user]);
 
-  const fetchUserPosts = async () => {
-    if (!user) return;
-
-    try {
-      const { data, error } = await supabase
-        .from('user_posts')
-        .select(`
-          *,
-          campaign_gallery!inner(title, image_url)
-        `)
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false });
-
-      if (error) {
-        console.error('Error fetching user posts:', error);
-        return;
-      }
-
-      setUserPosts(data || []);
-    } catch (error) {
-      console.error('Error fetching user posts:', error);
-    }
-  };
-
-  const calculateAnalytics = async () => {
-    if (!user) return;
-
-    try {
-      const { data, error } = await supabase
-        .from('user_posts')
-        .select('status')
-        .eq('user_id', user.id);
-
-      if (error) return;
-
-      const posts = data || [];
-      const approvedCount = posts.filter(p => p.status === 'approved').length;
-      
-      setAnalytics({
-        totalEarnings: approvedCount * 500,
-        postsSubmitted: posts.length,
-        approvedPosts: approvedCount,
-        pendingReviews: posts.filter(p => p.status === 'pending').length
-      });
-    } catch (error) {
-      console.error('Error calculating analytics:', error);
-    }
-  };
+  // Remove user posts functionality as table doesn't exist yet
 
   const fetchGalleryImages = async () => {
     try {
@@ -188,67 +138,16 @@ const Dashboard = () => {
   };
 
   const handleSubmitPost = async () => {
-    if (!selectedImages.length || !selectedPlatform || !postUrl || !user || !rewardType) {
-      toast({
-        title: "Missing Information",
-        description: "Please complete all steps and provide the post URL.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setLoading(true);
-    try {
-      // Get the active campaign (assuming there's only one active campaign)
-      const { data: campaigns, error: campaignError } = await supabase
-        .from('campaigns')
-        .select('id')
-        .eq('is_active', true)
-        .limit(1);
-
-      if (campaignError || !campaigns?.length) {
-        throw new Error('No active campaign found');
-      }
-
-      const { error } = await supabase
-        .from('user_posts')
-        .insert({
-          user_id: user.id,
-          campaign_id: campaigns[0].id,
-          gallery_image_id: selectedImages[0].id,
-          platform: selectedPlatform as 'facebook' | 'instagram' | 'twitter',
-          post_url: postUrl,
-          status: 'pending' as 'pending' | 'approved' | 'rejected'
-        });
-
-      if (error) {
-        throw error;
-      }
-
-      toast({
-        title: "Post Submitted!",
-        description: "Your post has been submitted for review. You'll be rewarded once approved.",
-      });
-
-      // Reset form
-      setSelectedImages([]);
-      setSelectedPlatform('');
-      setRewardType('');
-      setPostUrl('');
-      
-      // Refresh posts and analytics
-      fetchUserPosts();
-      calculateAnalytics();
-    } catch (error: any) {
-      console.error('Error submitting post:', error);
-      toast({
-        title: "Error",
-        description: "Failed to submit post. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
+    toast({
+      title: "Feature Coming Soon",
+      description: "Post submission feature will be available soon!",
+    });
+    
+    // Reset form for now
+    setSelectedImages([]);
+    setSelectedPlatform('');
+    setRewardType('');
+    setPostUrl('');
   };
 
   const handleLogout = async () => {
@@ -703,86 +602,14 @@ const Dashboard = () => {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  {userPosts.length === 0 ? (
-                    <div className="text-center py-12">
-                      <Share2 className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                      <h3 className="text-lg font-medium text-gray-900 mb-2">No posts yet</h3>
-                      <p className="text-gray-600 mb-6">Start sharing campaign content to earn rewards!</p>
-                      <Button onClick={() => setSelectedImages([])} variant="outline">
-                        Share Your First Post
-                      </Button>
-                    </div>
-                  ) : (
-                    <div className="space-y-4">
-                      {userPosts.map((post) => {
-                        const StatusIcon = getStatusIcon(post.status);
-                        const PlatformIcon = getPlatformIcon(post.platform);
-                        
-                        return (
-                          <div
-                            key={post.id}
-                            className="flex items-center space-x-4 p-4 bg-gray-50 rounded-xl"
-                          >
-                            <div className="w-16 h-16 rounded-xl overflow-hidden flex-shrink-0">
-                              <img
-                                src={post.campaign_gallery.image_url}
-                                alt={post.campaign_gallery.title}
-                                className="w-full h-full object-cover"
-                              />
-                            </div>
-                            
-                            <div className="flex-1 min-w-0">
-                              <h4 className="font-medium text-gray-900 truncate">
-                                {post.campaign_gallery.title}
-                              </h4>
-                              <div className="flex items-center space-x-2 mt-1">
-                                <PlatformIcon className="w-4 h-4 text-gray-500" />
-                                <span className="text-sm text-gray-600 capitalize">{post.platform}</span>
-                              </div>
-                              <p className="text-xs text-gray-500 mt-1">
-                                {new Date(post.created_at).toLocaleDateString()}
-                              </p>
-                            </div>
-                            
-                            <div className="flex items-center space-x-4">
-                              <Badge className={getStatusColor(post.status)}>
-                                <StatusIcon className="w-3 h-3 mr-1" />
-                                {post.status}
-                              </Badge>
-                              
-                              {post.status === 'pending' && (
-                                <div className="flex items-center text-yellow-600 text-sm">
-                                  <Clock className="w-4 h-4 mr-1" />
-                                  <span>Under Review</span>
-                                </div>
-                              )}
-
-                              {post.status === 'approved' && !post.is_rewarded && (
-                                <div className="flex items-center text-blue-600 text-sm">
-                                  <CheckCircle className="w-4 h-4 mr-1" />
-                                  <span>Processing Reward</span>
-                                </div>
-                              )}
-                              
-                              {post.is_rewarded && (
-                                <div className="flex items-center text-green-600">
-                                  <DollarSign className="w-4 h-4 mr-1" />
-                                  <span className="font-semibold">₦{post.reward_amount}</span>
-                                </div>
-                              )}
-
-                              {post.status === 'rejected' && (
-                                <div className="flex items-center text-red-600 text-sm">
-                                  <XCircle className="w-4 h-4 mr-1" />
-                                  <span>Not Approved</span>
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  )}
+                  <div className="text-center py-12">
+                    <Share2 className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                    <h3 className="text-lg font-medium text-gray-900 mb-2">No posts yet</h3>
+                    <p className="text-gray-600 mb-6">Start sharing campaign content to earn rewards!</p>
+                    <Button onClick={() => setSelectedImages([])} variant="outline">
+                      Share Your First Post
+                    </Button>
+                  </div>
                 </CardContent>
               </Card>
             </motion.div>
