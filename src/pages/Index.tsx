@@ -18,7 +18,7 @@ import Footer from '@/components/Footer';
 
 const Index = () => {
   const [isLoaded, setIsLoaded] = useState(false);
-  const { user, loading } = useAuth();
+  const { user, userProfile, loading, isAdmin } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -26,10 +26,15 @@ const Index = () => {
   }, []);
 
   useEffect(() => {
-    if (!loading && user) {
-      navigate('/dashboard');
+    if (!loading && user && userProfile) {
+      // Redirect based on user role
+      if (isAdmin) {
+        navigate('/admin');
+      } else {
+        navigate('/dashboard');
+      }
     }
-  }, [user, loading, navigate]);
+  }, [user, userProfile, loading, isAdmin, navigate]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-gray-50">

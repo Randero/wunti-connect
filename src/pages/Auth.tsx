@@ -21,15 +21,20 @@ const Auth = () => {
     phoneNumber: '',
   });
 
-  const { signIn, signUp, user } = useAuth();
+  const { signIn, signUp, user, userProfile, isAdmin } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (user) {
-      navigate('/');
+    if (user && userProfile) {
+      // Redirect authenticated users based on role
+      if (isAdmin) {
+        navigate('/admin');
+      } else {
+        navigate('/dashboard');
+      }
     }
-  }, [user, navigate]);
+  }, [user, userProfile, isAdmin, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -49,7 +54,7 @@ const Auth = () => {
             title: "Success",
             description: "Welcome back!",
           });
-          navigate('/dashboard');
+          // Don't redirect immediately, let the auth state change handle it
         }
       } else {
         const { error } = await signUp(formData.email, formData.password, formData.fullName);
