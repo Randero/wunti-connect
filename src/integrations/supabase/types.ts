@@ -14,7 +14,178 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      campaign_gallery: {
+        Row: {
+          campaign_id: string | null
+          caption: string | null
+          created_at: string
+          id: string
+          image_url: string
+          is_active: boolean | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          campaign_id?: string | null
+          caption?: string | null
+          created_at?: string
+          id?: string
+          image_url: string
+          is_active?: boolean | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          campaign_id?: string | null
+          caption?: string | null
+          created_at?: string
+          id?: string
+          image_url?: string
+          is_active?: boolean | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "campaign_gallery_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "campaigns"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      campaigns: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      contact_submissions: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          message: string
+          name: string
+          phone: string | null
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          message: string
+          name: string
+          phone?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          message?: string
+          name?: string
+          phone?: string | null
+        }
+        Relationships: []
+      }
+      news: {
+        Row: {
+          author_id: string | null
+          content: string
+          created_at: string
+          excerpt: string | null
+          id: string
+          image_url: string | null
+          is_published: boolean | null
+          published_at: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          author_id?: string | null
+          content: string
+          created_at?: string
+          excerpt?: string | null
+          id?: string
+          image_url?: string | null
+          is_published?: boolean | null
+          published_at?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          author_id?: string | null
+          content?: string
+          created_at?: string
+          excerpt?: string | null
+          id?: string
+          image_url?: string | null
+          is_published?: boolean | null
+          published_at?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "news_author_id_fkey"
+            columns: ["author_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          email: string | null
+          full_name: string | null
+          id: string
+          role: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          role?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          role?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
