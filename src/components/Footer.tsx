@@ -18,10 +18,10 @@ const Footer = () => {
   ];
 
   const supportLinks = [
-    { name: 'Help Center', href: '/help' },
-    { name: 'Privacy Policy', href: '/privacy' },
-    { name: 'Terms of Service', href: '/terms' },
-    { name: 'Support', href: '/support' },
+    { name: 'Help Center', href: '#contact' },
+    { name: 'Privacy Policy', href: '#contact' },
+    { name: 'Terms of Service', href: '#contact' },
+    { name: 'Support', href: '#contact' },
   ];
 
   return (
@@ -68,11 +68,11 @@ const Footer = () => {
           >
             <div className="flex items-center space-x-3 mb-6">
               <div className="w-12 h-12 bg-gradient-to-r from-blue-600 to-blue-500 rounded-full flex items-center justify-center">
-                <span className="text-white font-bold text-lg">EC</span>
+                <span className="text-white font-bold text-lg">KC</span>
               </div>
               <div>
-                <h2 className="text-2xl font-bold">Engr. Aliyu Muhammed Combat</h2>
-                <p className="text-blue-300">Engineering Progress for All</p>
+                <h2 className="text-2xl font-bold">Engr. Aliyu Muhammed Kombat</h2>
+                <p className="text-blue-300">Building Tomorrow Together</p>
               </div>
             </div>
             
@@ -179,7 +179,7 @@ const Footer = () => {
               transition={{ duration: 0.6 }}
               className="text-gray-300 text-sm"
             >
-              © 2024 Engr. Aliyu Muhammed Combat Campaign. All rights reserved.
+              © 2024 Engr. Aliyu Muhammed Kombat Campaign. All rights reserved.
             </motion.p>
             <motion.p
               initial={{ opacity: 0 }}

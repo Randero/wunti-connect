@@ -101,9 +101,20 @@ const PostEarnSection = () => {
           <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
             Earn While You Support
           </h2>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+          <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-8">
             Share campaign content on social media and get rewarded instantly. Choose airtime or data - it's that simple!
           </p>
+          
+          {/* Daily Limit Notice */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={isInView ? { opacity: 1, y: 0 } : {}}
+            transition={{ delay: 0.4, duration: 0.6 }}
+            className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-orange-100 to-red-100 border border-orange-200 rounded-full text-orange-700 font-semibold mb-8"
+          >
+            <Clock className="w-5 h-5 mr-2" />
+            Daily Limit: One reward per 24 hours
+          </motion.div>
         </motion.div>
 
         {/* Ultra Modern Platform Rewards */}
@@ -178,7 +189,7 @@ const PostEarnSection = () => {
                   <div className="flex items-center justify-between p-4 bg-blue-50 rounded-xl border border-blue-100">
                     <div className="flex items-center space-x-3">
                       <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                      <span className="text-blue-700 font-medium">Mobile Data</span>
+                      <span className="text-blue-700 font-medium">Data</span>
                     </div>
                     <span className="text-blue-600 font-bold text-lg">{platform.dataReward}</span>
                   </div>
@@ -186,7 +197,7 @@ const PostEarnSection = () => {
                 
                 {/* Reward Type Indicator */}
                 <div className="px-8 mb-4">
-                  <p className="text-xs text-gray-500 text-center">Choose between airtime or mobile data</p>
+                  <p className="text-xs text-gray-500 text-center">Choose between airtime or data</p>
                 </div>
                 
                 {/* CTA Button */}
@@ -350,28 +361,14 @@ const PostEarnSection = () => {
               <div className="absolute inset-0 bg-gradient-to-r from-blue-100/20 to-purple-100/20 rounded-3xl"></div>
               
               <div className="relative z-10">
-                <motion.div 
-                  initial={{ scale: 0.8 }}
-                  animate={isInView ? { scale: 1 } : {}}
-                  transition={{ delay: 2.2, duration: 0.5 }}
-                  className="flex items-center justify-center mb-6"
-                >
-                  <div className="p-3 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl shadow-lg mr-4">
-                    <Clock className="w-8 h-8 text-white" />
-                  </div>
-                  <span className="text-2xl font-bold bg-gradient-to-r from-blue-700 to-purple-700 bg-clip-text text-transparent">
-                    Daily Limit: One reward per 24 hours
-                  </span>
-                </motion.div>
-                
                 <motion.p 
                   initial={{ opacity: 0 }}
                   animate={isInView ? { opacity: 1 } : {}}
-                  transition={{ delay: 2.4, duration: 0.6 }}
+                  transition={{ delay: 2.2, duration: 0.6 }}
                   className="text-center text-gray-700 leading-relaxed text-lg"
                 >
                   Rewards are processed automatically and delivered within 24 hours of verification. 
-                  Choose between instant cash payments or mobile data top-ups.
+                  Choose between instant cash payments or data top-ups.
                 </motion.p>
               </div>
             </motion.div>

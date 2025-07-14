@@ -66,13 +66,13 @@ const HeroSection = () => {
       </div>
 
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20">
-        <div className="grid lg:grid-cols-2 gap-12 items-center">
+        <div className="grid lg:grid-cols-3 gap-12 items-center">
           {/* Left Content */}
           <motion.div
             initial={{ opacity: 0, x: -50 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8 }}
-            className="text-center lg:text-left"
+            className="lg:col-span-2 text-center lg:text-left"
           >
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -91,7 +91,20 @@ const HeroSection = () => {
               className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6 leading-tight"
             >
               Engr. Aliyu Muhammed
-              <span className="block text-blue-200">Combat</span>
+              <motion.span 
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.8, duration: 0.8, type: "spring" }}
+                className="block text-blue-900 font-extrabold"
+                style={{
+                  background: 'linear-gradient(135deg, #1e3a8a, #3b82f6)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  filter: 'drop-shadow(0 2px 4px rgba(59, 130, 246, 0.3))'
+                }}
+              >
+                Kombat
+              </motion.span>
             </motion.h1>
 
             <motion.p
@@ -158,9 +171,9 @@ const HeroSection = () => {
             transition={ { duration: 0.8, delay: 0.4 }}
             className="relative"
           >
-            <div className="relative w-full max-w-lg mx-auto">
+            <div className="relative w-full max-w-md mx-auto">
               {/* Main Photo Display */}
-              <div className="relative h-96 md:h-[500px] rounded-3xl overflow-hidden shadow-2xl">
+              <div className="relative h-80 md:h-96 rounded-3xl overflow-hidden shadow-2xl">
                 <AnimatePresence mode="wait">
                   <motion.div
                     key={currentSlide}
