@@ -95,12 +95,14 @@ const HeroSection = () => {
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 0.8, duration: 0.8, type: "spring" }}
-                className="block text-blue-900 font-extrabold"
+                className="block font-extrabold text-transparent bg-clip-text relative gradient-text"
                 style={{
-                  background: 'linear-gradient(135deg, #1e3a8a, #3b82f6)',
+                  background: 'linear-gradient(135deg, #ff6b6b, #ffd93d, #6bcf7f, #4ecdc4, #45b7d1, #96ceb4, #feca57)',
                   WebkitBackgroundClip: 'text',
                   WebkitTextFillColor: 'transparent',
-                  filter: 'drop-shadow(0 2px 4px rgba(59, 130, 246, 0.3))'
+                  backgroundSize: '300% 300%',
+                  filter: 'drop-shadow(0 0 20px rgba(255, 107, 107, 0.6)) drop-shadow(0 0 40px rgba(255, 217, 61, 0.4))',
+                  textShadow: '0 0 30px rgba(255, 107, 107, 0.8)'
                 }}
               >
                 Kombat
