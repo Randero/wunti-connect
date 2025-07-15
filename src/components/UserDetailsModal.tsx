@@ -30,13 +30,15 @@ interface UserDetailsModalProps {
   isOpen: boolean;
   onClose: () => void;
   onRoleUpdate: (userId: string, newRole: string) => void;
+  onAccountAction?: (action: string, userId: string) => void;
 }
 
 export const UserDetailsModal: React.FC<UserDetailsModalProps> = ({
   user,
   isOpen,
   onClose,
-  onRoleUpdate
+  onRoleUpdate,
+  onAccountAction
 }) => {
   const [selectedRole, setSelectedRole] = useState(user?.role || 'user');
 
@@ -280,13 +282,28 @@ export const UserDetailsModal: React.FC<UserDetailsModalProps> = ({
                       Manage this user's account settings and access
                     </p>
                     <div className="space-y-2">
-                      <Button variant="outline" size="sm" className="w-full">
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="w-full"
+                        onClick={() => onAccountAction?.('resetPassword', user.user_id)}
+                      >
                         Reset Password
                       </Button>
-                      <Button variant="outline" size="sm" className="w-full">
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="w-full"
+                        onClick={() => onAccountAction?.('suspendAccount', user.user_id)}
+                      >
                         Suspend Account
                       </Button>
-                      <Button variant="destructive" size="sm" className="w-full">
+                      <Button 
+                        variant="destructive" 
+                        size="sm" 
+                        className="w-full"
+                        onClick={() => onAccountAction?.('deleteAccount', user.user_id)}
+                      >
                         Delete Account
                       </Button>
                     </div>

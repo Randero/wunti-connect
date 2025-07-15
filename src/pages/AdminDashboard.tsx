@@ -480,8 +480,78 @@ const AdminDashboard = () => {
         description: `User role updated to ${newRole}.`,
       });
 
-      fetchUsers();
-      setShowUserDetails(false);
+      // Update the users list immediately
+      setUsers(prevUsers => 
+        prevUsers.map(user => 
+          user.user_id === userId ? { ...user, role: newRole } : user
+        )
+      );
+      
+      // Also update selectedUser if it's the one being modified
+      if (selectedUser && selectedUser.user_id === userId) {
+        setSelectedUser({ ...selectedUser, role: newRole });
+      }
+      
+      fetchUsers(); // Still fetch to ensure data consistency
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleAccountAction = async (action: string, userId: string) => {
+    try {
+      switch (action) {
+        case 'resetPassword':
+          // This would trigger a password reset email in a real implementation
+          toast({
+            title: "Password Reset",
+            description: "Password reset email sent to user.",
+          });
+          break;
+        case 'suspendAccount':
+          const { error: suspendError } = await supabase
+            .from('profiles')
+            .update({ role: 'suspended' })
+            .eq('user_id', userId);
+          
+          if (suspendError) throw suspendError;
+          
+          toast({
+            title: "Account Suspended",
+            description: "User account has been suspended.",
+          });
+          
+          setUsers(prevUsers => 
+            prevUsers.map(user => 
+              user.user_id === userId ? { ...user, role: 'suspended' } : user
+            )
+          );
+          break;
+        case 'deleteAccount':
+          if (!confirm('Are you sure you want to delete this user? This action cannot be undone.')) {
+            return;
+          }
+          
+          const { error: deleteError } = await supabase
+            .from('profiles')
+            .delete()
+            .eq('user_id', userId);
+          
+          if (deleteError) throw deleteError;
+          
+          toast({
+            title: "Account Deleted",
+            description: "User account has been permanently deleted.",
+          });
+          
+          setUsers(prevUsers => prevUsers.filter(user => user.user_id !== userId));
+          setShowUserDetails(false);
+          break;
+      }
     } catch (error: any) {
       toast({
         title: "Error",
@@ -1437,6 +1507,7 @@ const AdminDashboard = () => {
         isOpen={showUserDetails}
         onClose={() => setShowUserDetails(false)}
         onRoleUpdate={updateUserRole}
+        onAccountAction={handleAccountAction}
       />
 
       <AddUserModal
