@@ -154,10 +154,21 @@ export const UserDetailsModal: React.FC<UserDetailsModalProps> = ({
                     <span className="font-medium">{formatDate(user.updated_at)}</span>
                   </div>
                   <div className="flex justify-between items-center p-3 bg-muted rounded-lg">
-                    <span className="text-muted-foreground">Status</span>
-                    <Badge variant="secondary" className="bg-green-100 text-green-800">
-                      <CheckCircle className="w-3 h-3 mr-1" />
-                      Active
+                    <span className="text-muted-foreground">Account Status</span>
+                    <Badge 
+                      variant="secondary" 
+                      className={
+                        user.account_status === 'suspended'
+                          ? 'bg-red-100 text-red-800 border-red-200'
+                          : user.account_status === 'deactivated'
+                          ? 'bg-gray-100 text-gray-800 border-gray-200'
+                          : 'bg-green-100 text-green-800 border-green-200'
+                      }
+                    >
+                      {user.account_status === 'suspended' && <XCircle className="w-3 h-3 mr-1" />}
+                      {user.account_status === 'deactivated' && <User className="w-3 h-3 mr-1" />}
+                      {(!user.account_status || user.account_status === 'active') && <CheckCircle className="w-3 h-3 mr-1" />}
+                      {user.account_status?.charAt(0).toUpperCase() + user.account_status?.slice(1) || 'Active'}
                     </Badge>
                   </div>
                 </CardContent>
@@ -290,14 +301,27 @@ export const UserDetailsModal: React.FC<UserDetailsModalProps> = ({
                       >
                         Reset Password
                       </Button>
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
-                        className="w-full"
-                        onClick={() => onAccountAction?.('suspendAccount', user.user_id)}
-                      >
-                        Suspend Account
-                      </Button>
+                      {user.account_status === 'suspended' ? (
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="w-full text-green-600 hover:text-green-700"
+                          onClick={() => onAccountAction?.('unsuspendAccount', user.user_id)}
+                        >
+                          <CheckCircle className="w-4 h-4 mr-2" />
+                          Unsuspend Account
+                        </Button>
+                      ) : (
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="w-full text-orange-600 hover:text-orange-700"
+                          onClick={() => onAccountAction?.('suspendAccount', user.user_id)}
+                        >
+                          <XCircle className="w-4 h-4 mr-2" />
+                          Suspend Account
+                        </Button>
+                      )}
                       <Button 
                         variant="destructive" 
                         size="sm" 

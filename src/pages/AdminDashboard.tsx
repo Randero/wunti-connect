@@ -52,6 +52,7 @@ interface User {
   full_name: string;
   email: string;
   role: string;
+  account_status: string;
   created_at: string;
   updated_at: string;
 }
@@ -535,7 +536,7 @@ const AdminDashboard = () => {
         case 'suspendAccount':
           const { error: suspendError } = await supabase
             .from('profiles')
-            .update({ role: 'suspended' })
+            .update({ account_status: 'suspended' })
             .eq('user_id', userId);
           
           if (suspendError) throw suspendError;
@@ -547,9 +548,38 @@ const AdminDashboard = () => {
           
           setUsers(prevUsers => 
             prevUsers.map(user => 
-              user.user_id === userId ? { ...user, role: 'suspended' } : user
+              user.user_id === userId ? { ...user, account_status: 'suspended' } : user
             )
           );
+          
+          // Update selectedUser if it's the one being modified
+          if (selectedUser && selectedUser.user_id === userId) {
+            setSelectedUser({ ...selectedUser, account_status: 'suspended' });
+          }
+          break;
+        case 'unsuspendAccount':
+          const { error: unsuspendError } = await supabase
+            .from('profiles')
+            .update({ account_status: 'active' })
+            .eq('user_id', userId);
+          
+          if (unsuspendError) throw unsuspendError;
+          
+          toast({
+            title: "Account Reactivated",
+            description: "User account has been reactivated.",
+          });
+          
+          setUsers(prevUsers => 
+            prevUsers.map(user => 
+              user.user_id === userId ? { ...user, account_status: 'active' } : user
+            )
+          );
+          
+          // Update selectedUser if it's the one being modified
+          if (selectedUser && selectedUser.user_id === userId) {
+            setSelectedUser({ ...selectedUser, account_status: 'active' });
+          }
           break;
         case 'deleteAccount':
           if (!confirm('Are you sure you want to delete this user? This action cannot be undone.')) {
@@ -959,34 +989,67 @@ const AdminDashboard = () => {
                                   {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
                                 </Badge>
                               </TableCell>
-                              <TableCell>
-                                <Badge variant="secondary" className="bg-green-100 text-green-800 border-green-200">
-                                  <CheckCircle className="w-3 h-3 mr-1" />
-                                  Active
-                                </Badge>
-                              </TableCell>
+                               <TableCell>
+                                 <Badge 
+                                   variant="secondary" 
+                                   className={
+                                     user.account_status === 'suspended'
+                                       ? 'bg-red-100 text-red-800 border-red-200'
+                                       : user.account_status === 'deactivated'
+                                       ? 'bg-gray-100 text-gray-800 border-gray-200'
+                                       : 'bg-green-100 text-green-800 border-green-200'
+                                   }
+                                 >
+                                   {user.account_status === 'suspended' && <XCircle className="w-3 h-3 mr-1" />}
+                                   {user.account_status === 'deactivated' && <UserX className="w-3 h-3 mr-1" />}
+                                   {user.account_status === 'active' && <CheckCircle className="w-3 h-3 mr-1" />}
+                                   {user.account_status?.charAt(0).toUpperCase() + user.account_status?.slice(1) || 'Active'}
+                                 </Badge>
+                               </TableCell>
                               <TableCell className="text-muted-foreground">
                                 {new Date(user.created_at).toLocaleDateString()}
                               </TableCell>
-                              <TableCell>
-                                <div className="flex items-center justify-center space-x-2">
-                                  <Button
-                                    size="sm"
-                                    variant="outline"
-                                    onClick={() => handleViewUser(user)}
-                                  >
-                                    <Eye className="w-3 h-3" />
-                                  </Button>
-                                  <Button
-                                    size="sm"
-                                    variant="outline"
-                                    onClick={() => deleteUser(user.user_id)}
-                                    className="text-destructive hover:text-destructive"
-                                  >
-                                    <Trash2 className="w-3 h-3" />
-                                  </Button>
-                                </div>
-                              </TableCell>
+                               <TableCell>
+                                 <div className="flex items-center justify-center space-x-2">
+                                   <Button
+                                     size="sm"
+                                     variant="outline"
+                                     onClick={() => handleViewUser(user)}
+                                   >
+                                     <Eye className="w-3 h-3" />
+                                   </Button>
+                                   {user.account_status === 'suspended' ? (
+                                     <Button
+                                       size="sm"
+                                       variant="outline"
+                                       onClick={() => handleAccountAction('unsuspendAccount', user.user_id)}
+                                       className="text-green-600 hover:text-green-700"
+                                       title="Unsuspend Account"
+                                     >
+                                       <CheckCircle className="w-3 h-3" />
+                                     </Button>
+                                   ) : (
+                                     <Button
+                                       size="sm"
+                                       variant="outline"
+                                       onClick={() => handleAccountAction('suspendAccount', user.user_id)}
+                                       className="text-orange-600 hover:text-orange-700"
+                                       title="Suspend Account"
+                                     >
+                                       <UserX className="w-3 h-3" />
+                                     </Button>
+                                   )}
+                                   <Button
+                                     size="sm"
+                                     variant="outline"
+                                     onClick={() => deleteUser(user.user_id)}
+                                     className="text-destructive hover:text-destructive"
+                                     title="Delete Account"
+                                   >
+                                     <Trash2 className="w-3 h-3" />
+                                   </Button>
+                                 </div>
+                               </TableCell>
                             </motion.tr>
                           ))}
                         </TableBody>
