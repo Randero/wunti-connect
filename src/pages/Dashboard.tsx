@@ -667,7 +667,7 @@ const Dashboard = () => {
                         <li>• Include hashtags: #AliyuCambat #Vote2024 #PositiveChange</li>
                         <li>• Copy the post link immediately after posting</li>
                         <li>• Your submission will be reviewed within 24 hours</li>
-                        <li>• Reward after approval: {rewardType === 'airtime' ? '₦500 Airtime' : '2GB Data'}</li>
+                        <li>• Reward after approval: {rewardType === 'airtime' ? `₦${selectedPlatform === 'facebook' ? '200' : selectedPlatform === 'instagram' ? '500' : '700'} Airtime` : '2GB Data'}</li>
                       </ul>
                       
                       {selectedImages.length > 0 && (
@@ -928,7 +928,7 @@ const Dashboard = () => {
                     Airtime Reward
                   </h3>
                   <p className="text-sm text-gray-600 group-hover:text-green-600 transition-colors">
-                    ₦500 Mobile Credit
+                    ₦{selectedPlatform === 'facebook' ? '200' : selectedPlatform === 'instagram' ? '500' : '700'} Mobile Credit
                   </p>
                 </div>
                 {rewardType === 'airtime' && (

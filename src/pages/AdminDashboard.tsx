@@ -460,6 +460,34 @@ const AdminDashboard = () => {
     }
   };
 
+  const deleteGalleryImage = async (imageId: string) => {
+    if (!confirm('Are you sure you want to delete this image? This action cannot be undone.')) {
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('campaign_gallery')
+        .delete()
+        .eq('id', imageId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Image Deleted",
+        description: "Gallery image has been permanently deleted.",
+      });
+
+      fetchGalleryImages();
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
+
   const updatePostStatus = async (postId: string, newStatus: 'approved' | 'rejected', earnings?: number) => {
     try {
       const updateData: any = { status: newStatus };
@@ -1387,6 +1415,13 @@ const AdminDashboard = () => {
                                   onClick={() => toggleImageStatus(image.id, image.is_active)}
                                 >
                                   {image.is_active ? <XCircle className="w-3 h-3" /> : <CheckCircle className="w-3 h-3" />}
+                                </Button>
+                                <Button 
+                                  size="sm" 
+                                  variant="destructive"
+                                  onClick={() => deleteGalleryImage(image.id)}
+                                >
+                                  <Trash2 className="w-3 h-3" />
                                 </Button>
                               </div>
                             </div>
