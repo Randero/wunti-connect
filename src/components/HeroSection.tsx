@@ -25,7 +25,7 @@ const HeroSection = () => {
     },
     {
       id: 3,
-      url: "KC/guy.png",
+      src: "KC/guy.png",
       title: "Engineering Excellence",
       description: "Technical expertise for practical solutions"
     }
@@ -178,7 +178,7 @@ const HeroSection = () => {
                     className="absolute inset-0"
                   >
                     <img
-                      src={candidatePhotos[currentSlide].url}
+                      src={candidatePhotos[currentSlide].src}
                       alt={candidatePhotos[currentSlide].title}
                       className="w-full h-full object-cover"
                     />
