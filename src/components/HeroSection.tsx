@@ -25,7 +25,7 @@ const HeroSection = () => {
     },
     {
       id: 3,
-      url: "KC/gut.png",
+      url: "KC/guy.png",
       title: "Engineering Excellence",
       description: "Technical expertise for practical solutions"
     }
