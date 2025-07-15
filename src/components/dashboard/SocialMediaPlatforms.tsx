@@ -69,15 +69,17 @@ const SocialMediaPlatforms: React.FC<SocialMediaPlatformsProps> = ({
       id: 'airtime',
       name: 'Mobile Airtime',
       icon: Smartphone,
-      description: 'Get mobile airtime credits',
-      benefit: 'Instant top-up'
+      description: 'Get mobile airtime credits instantly to your phone',
+      benefit: 'Instant top-up',
+      details: 'Works with all major networks. Credits appear within 5 minutes.'
     },
     {
       id: 'data',
       name: 'Mobile Data',
       icon: Wifi,
-      description: 'Get mobile data bundles',
-      benefit: 'High-speed internet'
+      description: 'Get high-speed mobile data bundles',
+      benefit: 'High-speed internet',
+      details: 'Fast 4G/5G data packages. Valid for 30 days from activation.'
     }
   ];
 
@@ -100,7 +102,7 @@ const SocialMediaPlatforms: React.FC<SocialMediaPlatformsProps> = ({
 
   return (
     <Dialog open={true} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto mx-4">
         <DialogHeader>
           <div className="flex items-center justify-between">
             <DialogTitle className="text-2xl font-bold flex items-center">
@@ -280,12 +282,17 @@ const SocialMediaPlatforms: React.FC<SocialMediaPlatformsProps> = ({
                               <p className="text-muted-foreground text-sm mb-3">
                                 {reward.description}
                               </p>
-                              <Badge variant="outline" className={
-                                selectedReward === reward.id ? 'border-primary text-primary' : ''
-                              }>
-                                <Zap className="h-3 w-3 mr-1" />
-                                {reward.benefit}
-                              </Badge>
+                              <div className="space-y-2">
+                                <Badge variant="outline" className={
+                                  selectedReward === reward.id ? 'border-primary text-primary' : ''
+                                }>
+                                  <Zap className="h-3 w-3 mr-1" />
+                                  {reward.benefit}
+                                </Badge>
+                                <p className="text-xs text-muted-foreground">
+                                  {reward.details}
+                                </p>
+                              </div>
                             </CardContent>
                           </Card>
                         </Label>

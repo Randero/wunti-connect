@@ -83,7 +83,7 @@ const AnalyticsCards: React.FC<AnalyticsCardsProps> = ({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.1 }}
-      className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8"
+      className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6 mb-6 md:mb-8"
     >
       {cards.map((card, index) => {
         const Icon = card.icon;
@@ -98,28 +98,28 @@ const AnalyticsCards: React.FC<AnalyticsCardsProps> = ({
             className="group"
           >
             <Card className={`border-0 shadow-lg hover:shadow-xl transition-all duration-300 ${card.bgColor} ${card.borderColor} border-2 overflow-hidden relative`}>
-              <CardContent className="p-6">
+              <CardContent className="p-3 md:p-6">
                 {/* Background Pattern */}
-                <div className="absolute top-0 right-0 w-20 h-20 opacity-10">
-                  <div className={`w-full h-full bg-gradient-to-br ${card.color} rounded-full transform translate-x-6 -translate-y-6`} />
+                <div className="absolute top-0 right-0 w-16 h-16 md:w-20 md:h-20 opacity-10">
+                  <div className={`w-full h-full bg-gradient-to-br ${card.color} rounded-full transform translate-x-4 -translate-y-4 md:translate-x-6 md:-translate-y-6`} />
                 </div>
 
                 <div className="relative z-10">
-                  <div className="flex items-center justify-between mb-4">
-                    <div className={`w-12 h-12 rounded-xl bg-gradient-to-r ${card.color} flex items-center justify-center shadow-md group-hover:scale-110 transition-transform duration-300`}>
-                      <Icon className="h-6 w-6 text-white" />
+                  <div className="flex items-center justify-between mb-3 md:mb-4">
+                    <div className={`w-8 h-8 md:w-12 md:h-12 rounded-xl bg-gradient-to-r ${card.color} flex items-center justify-center shadow-md group-hover:scale-110 transition-transform duration-300`}>
+                      <Icon className="h-4 w-4 md:h-6 md:w-6 text-white" />
                     </div>
                     
                     {card.trend === 'up' && (
-                      <Badge variant="secondary" className="bg-white/50 text-green-700 border-green-200">
+                      <Badge variant="secondary" className="bg-white/50 text-green-700 border-green-200 text-xs hidden md:flex">
                         <TrendingUp className="h-3 w-3 mr-1" />
-                        Growing
+                        <span className="hidden lg:inline">Growing</span>
                       </Badge>
                     )}
                   </div>
 
-                  <div className="space-y-2">
-                    <h3 className="text-sm font-medium text-muted-foreground">
+                  <div className="space-y-1 md:space-y-2">
+                    <h3 className="text-xs md:text-sm font-medium text-muted-foreground">
                       {card.title}
                     </h3>
                     
@@ -127,12 +127,12 @@ const AnalyticsCards: React.FC<AnalyticsCardsProps> = ({
                       initial={{ scale: 0.8 }}
                       animate={{ scale: 1 }}
                       transition={{ delay: index * 0.1 + 0.5, type: "spring" }}
-                      className="text-3xl font-bold"
+                      className="text-lg md:text-3xl font-bold"
                     >
                       {card.value}
                     </motion.div>
                     
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-xs text-muted-foreground hidden md:block">
                       {card.change}
                     </p>
                   </div>

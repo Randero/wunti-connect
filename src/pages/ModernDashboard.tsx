@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
@@ -21,7 +21,9 @@ import {
   Target,
   CheckCircle,
   Loader2,
-  Star
+  Star,
+  LogOut,
+  Sparkles
 } from 'lucide-react';
 import GallerySelector from '@/components/dashboard/GallerySelector';
 import SocialMediaPlatforms from '@/components/dashboard/SocialMediaPlatforms';
@@ -54,6 +56,7 @@ interface UserLevel {
 const ModernDashboard = () => {
   const { user } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
   
   const [selectedImages, setSelectedImages] = useState<any[]>([]);
   const [selectedPlatform, setSelectedPlatform] = useState<string>('');
@@ -163,6 +166,23 @@ const ModernDashboard = () => {
     setShowSubmissionForm(true);
   };
 
+  const handleSignOut = async () => {
+    try {
+      await supabase.auth.signOut();
+      navigate("/");
+      toast({
+        title: "Signed out successfully",
+        description: "You have been logged out of your account.",
+      });
+    } catch (error) {
+      toast({
+        title: "Error signing out",
+        description: "There was a problem signing you out.",
+        variant: "destructive",
+      });
+    }
+  };
+
   const handlePostSubmission = async (postUrl: string) => {
     try {
       const { error } = await supabase
@@ -223,62 +243,38 @@ const ModernDashboard = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
       {/* Animated background elements */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -inset-10 opacity-50">
-          <div className="absolute top-1/4 left-1/4 w-72 h-72 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl animate-pulse"></div>
-          <div className="absolute top-3/4 right-1/4 w-72 h-72 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl animate-pulse delay-1000"></div>
-          <div className="absolute bottom-1/4 left-1/3 w-72 h-72 bg-pink-500 rounded-full mix-blend-multiply filter blur-xl animate-pulse delay-2000"></div>
-        </div>
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-20 -right-20 w-40 h-40 md:w-80 md:h-80 md:-top-40 md:-right-40 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob"></div>
+        <div className="absolute -bottom-20 -left-20 w-40 h-40 md:w-80 md:h-80 md:-bottom-40 md:-left-40 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-2000"></div>
+        <div className="absolute top-20 left-20 w-40 h-40 md:w-80 md:h-80 md:top-40 md:left-40 bg-pink-500 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-4000"></div>
       </div>
-      
-      <div className="relative z-10 container mx-auto px-4 py-8">
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-8"
-        >
-          <div className="flex items-center justify-between mb-8">
-            <div className="relative">
-              <motion.h1 
-                initial={{ opacity: 0, x: -50 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.2 }}
-                className="text-5xl font-bold bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent mb-3"
-              >
-                Welcome Back, Champion! 🚀
-              </motion.h1>
-              <motion.p 
-                initial={{ opacity: 0, x: -30 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.4 }}
-                className="text-gray-300 text-lg"
-              >
-                Your ultra-modern campaign command center
-              </motion.p>
-              <div className="absolute -top-2 -left-2 w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full opacity-20 animate-ping"></div>
+
+      <div className="relative z-10 container mx-auto px-3 md:px-4 py-4 md:py-8 space-y-4 md:space-y-6">
+        {/* Header with Sign Out */}
+        <div className="flex justify-between items-start">
+          <div className="text-center flex-1 space-y-2 md:space-y-4">
+            <div className="flex items-center justify-center space-x-2">
+              <Sparkles className="h-6 w-6 md:h-8 md:w-8 text-yellow-400 animate-pulse" />
+              <h1 className="text-2xl md:text-4xl font-bold bg-gradient-to-r from-white to-purple-200 bg-clip-text text-transparent">
+                Campaign Dashboard
+              </h1>
             </div>
-            <motion.div
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.6 }}
-              whileHover={{ scale: 1.05, rotate: 5 }}
-              whileTap={{ scale: 0.95 }}
-              className="relative"
-            >
-              <div className="absolute inset-0 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-xl blur opacity-75 animate-pulse"></div>
-              <Badge className="relative bg-gradient-to-r from-yellow-500 to-orange-500 text-black text-xl px-6 py-3 font-bold border-0">
-                <Trophy className="h-5 w-5 mr-2" />
-                Level {userLevel?.current_level || 1}
-              </Badge>
-            </motion.div>
+            <p className="text-gray-300 text-sm md:text-lg">
+              Share campaign content and earn rewards
+            </p>
           </div>
+          <Button
+            onClick={handleSignOut}
+            variant="outline"
+            size="sm"
+            className="ml-4 bg-white/10 border-white/20 text-white hover:bg-white/20"
+          >
+            <LogOut className="h-4 w-4 mr-2" />
+            <span className="hidden sm:inline">Sign Out</span>
+          </Button>
+        </div>
 
-          {/* User Level Display */}
-          {userLevel && <UserLevelDisplay userLevel={userLevel} />}
-        </motion.div>
-
-        {/* Analytics Cards */}
+        {/* Analytics Overview - Moved to top */}
         {userAnalytics && (
           <AnalyticsCards 
             analytics={userAnalytics} 
@@ -287,40 +283,46 @@ const ModernDashboard = () => {
           />
         )}
 
-        {/* Main Content Tabs */}
+        {/* User Level Display */}
+        {userLevel && <UserLevelDisplay userLevel={userLevel} />}
+
+        {/* Main Content */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
         >
           <Tabs defaultValue="gallery" className="w-full">
-            <TabsList className="grid w-full grid-cols-3 mb-8">
-              <TabsTrigger value="gallery" className="text-lg">
-                🎯 Post Campaign
+            <TabsList className="grid w-full grid-cols-3 mb-6 h-auto">
+              <TabsTrigger value="gallery" className="text-xs md:text-sm py-2 md:py-3">
+                <span className="md:hidden">🎯 Post</span>
+                <span className="hidden md:inline">🎯 Post Campaign</span>
               </TabsTrigger>
-              <TabsTrigger value="analytics" className="text-lg">
-                📊 Analytics
+              <TabsTrigger value="analytics" className="text-xs md:text-sm py-2 md:py-3">
+                <span className="md:hidden">📊 Stats</span>
+                <span className="hidden md:inline">📊 Analytics</span>
               </TabsTrigger>
-              <TabsTrigger value="history" className="text-lg">
-                📝 Post History
+              <TabsTrigger value="history" className="text-xs md:text-sm py-2 md:py-3">
+                <span className="md:hidden">📝 History</span>
+                <span className="hidden md:inline">📝 Post History</span>
               </TabsTrigger>
             </TabsList>
 
             <TabsContent value="gallery">
               <Card className="border-0 shadow-xl bg-gradient-to-br from-card/80 to-card/60 backdrop-blur-sm">
-                <CardContent className="p-8">
+                <CardContent className="p-4 md:p-8">
                   {!canPost ? (
                     <motion.div
                       initial={{ opacity: 0, scale: 0.9 }}
                       animate={{ opacity: 1, scale: 1 }}
-                      className="text-center py-12"
+                      className="text-center py-8 md:py-12"
                     >
-                      <Clock className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-                      <h3 className="text-2xl font-bold mb-2">Next Post Available In:</h3>
-                      <div className="text-4xl font-mono font-bold text-primary mb-4">
+                      <Clock className="h-12 w-12 md:h-16 md:w-16 text-muted-foreground mx-auto mb-4" />
+                      <h3 className="text-xl md:text-2xl font-bold mb-2">Next Post Available In:</h3>
+                      <div className="text-2xl md:text-4xl font-mono font-bold text-primary mb-4">
                         {nextPostCountdown}
                       </div>
-                      <p className="text-muted-foreground">
+                      <p className="text-muted-foreground text-sm md:text-base">
                         You can only post once every 24 hours to maintain quality
                       </p>
                     </motion.div>
@@ -336,44 +338,44 @@ const ModernDashboard = () => {
 
             <TabsContent value="analytics">
               <Card className="border-0 shadow-xl bg-gradient-to-br from-card/80 to-card/60 backdrop-blur-sm">
-                <CardContent className="p-8">
-                  <h3 className="text-2xl font-bold mb-6">Detailed Analytics</h3>
+                <CardContent className="p-4 md:p-8">
+                  <h3 className="text-xl md:text-2xl font-bold mb-6">Detailed Analytics</h3>
                   {userAnalytics && (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                       <motion.div
                         whileHover={{ scale: 1.02 }}
-                        className="p-6 rounded-xl bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/20"
+                        className="p-4 md:p-6 rounded-xl bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/20"
                       >
                         <div className="flex items-center justify-between mb-4">
-                          <BarChart3 className="h-8 w-8 text-primary" />
-                          <Badge variant="outline">This Month</Badge>
+                          <BarChart3 className="h-6 w-6 md:h-8 md:w-8 text-primary" />
+                          <Badge variant="outline" className="text-xs">This Month</Badge>
                         </div>
-                        <div className="text-3xl font-bold">{userAnalytics.total_posts}</div>
-                        <p className="text-muted-foreground">Total Posts</p>
+                        <div className="text-2xl md:text-3xl font-bold">{userAnalytics.total_posts}</div>
+                        <p className="text-muted-foreground text-sm">Total Posts</p>
                       </motion.div>
 
                       <motion.div
                         whileHover={{ scale: 1.02 }}
-                        className="p-6 rounded-xl bg-gradient-to-br from-green-500/10 to-green-500/5 border border-green-500/20"
+                        className="p-4 md:p-6 rounded-xl bg-gradient-to-br from-green-500/10 to-green-500/5 border border-green-500/20"
                       >
                         <div className="flex items-center justify-between mb-4">
-                          <DollarSign className="h-8 w-8 text-green-500" />
-                          <Badge variant="outline">Earnings</Badge>
+                          <DollarSign className="h-6 w-6 md:h-8 md:w-8 text-green-500" />
+                          <Badge variant="outline" className="text-xs">Earnings</Badge>
                         </div>
-                        <div className="text-3xl font-bold">${userAnalytics.total_earnings}</div>
-                        <p className="text-muted-foreground">Total Earned</p>
+                        <div className="text-2xl md:text-3xl font-bold">${userAnalytics.total_earnings}</div>
+                        <p className="text-muted-foreground text-sm">Total Earned</p>
                       </motion.div>
 
                       <motion.div
                         whileHover={{ scale: 1.02 }}
-                        className="p-6 rounded-xl bg-gradient-to-br from-blue-500/10 to-blue-500/5 border border-blue-500/20"
+                        className="p-4 md:p-6 rounded-xl bg-gradient-to-br from-blue-500/10 to-blue-500/5 border border-blue-500/20"
                       >
                         <div className="flex items-center justify-between mb-4">
-                          <Trophy className="h-8 w-8 text-blue-500" />
-                          <Badge variant="outline">Achievement</Badge>
+                          <Trophy className="h-6 w-6 md:h-8 md:w-8 text-blue-500" />
+                          <Badge variant="outline" className="text-xs">Achievement</Badge>
                         </div>
-                        <div className="text-3xl font-bold">Level {userLevel?.current_level || 1}</div>
-                        <p className="text-muted-foreground">Current Level</p>
+                        <div className="text-2xl md:text-3xl font-bold">Level {userLevel?.current_level || 1}</div>
+                        <p className="text-muted-foreground text-sm">Current Level</p>
                       </motion.div>
                     </div>
                   )}
