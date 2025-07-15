@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -829,55 +829,187 @@ const Dashboard = () => {
         <Dialog open={showRewardDialog} onOpenChange={setShowRewardDialog}>
           <DialogContent className="sm:max-w-md">
             <DialogHeader>
-              <DialogTitle className="text-center">Choose Your Reward</DialogTitle>
+              <DialogTitle className="text-center flex items-center justify-center space-x-2">
+                <Gift className="w-6 h-6 text-purple-600" />
+                <span>Choose Your Reward</span>
+              </DialogTitle>
               <DialogDescription className="text-center">
-                Select your preferred reward type
+                Select your preferred reward type to continue
               </DialogDescription>
             </DialogHeader>
-            <div className="grid grid-cols-1 gap-4 py-4">
+            
+            <motion.div 
+              className="grid grid-cols-1 gap-4 py-4"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, staggerChildren: 0.1 }}
+            >
               <motion.button
                 onClick={() => handleRewardSelect('airtime')}
-                className="flex items-center space-x-4 p-4 rounded-xl border-2 border-gray-200 hover:border-green-300 hover:bg-green-50 transition-all duration-200"
-                whileHover={{ scale: 1.02 }}
+                className={`group flex items-center space-x-4 p-6 rounded-xl border-2 transition-all duration-300 transform ${
+                  rewardType === 'airtime' 
+                    ? 'border-green-500 bg-green-50 shadow-lg scale-105' 
+                    : 'border-gray-200 hover:border-green-300 hover:bg-green-50 hover:shadow-md'
+                }`}
+                whileHover={{ scale: rewardType === 'airtime' ? 1.05 : 1.03 }}
                 whileTap={{ scale: 0.98 }}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.3, delay: 0.1 }}
               >
-                <div className="w-12 h-12 bg-green-600 rounded-xl flex items-center justify-center">
-                  <Smartphone className="w-6 h-6 text-white" />
+                <motion.div 
+                  className={`w-14 h-14 rounded-xl flex items-center justify-center transition-all duration-300 ${
+                    rewardType === 'airtime' 
+                      ? 'bg-green-600 shadow-lg' 
+                      : 'bg-green-500 group-hover:bg-green-600 group-hover:shadow-lg'
+                  }`}
+                  whileHover={{ rotate: 5 }}
+                >
+                  <Smartphone className="w-7 h-7 text-white" />
+                </motion.div>
+                <div className="text-left flex-1">
+                  <h3 className={`font-bold text-lg transition-colors ${
+                    rewardType === 'airtime' ? 'text-green-700' : 'text-gray-900 group-hover:text-green-700'
+                  }`}>
+                    Airtime Reward
+                  </h3>
+                  <p className="text-sm text-gray-600 group-hover:text-green-600 transition-colors">
+                    ₦500 Mobile Credit
+                  </p>
                 </div>
-                <div className="text-left">
-                  <h3 className="font-semibold text-gray-900">Airtime</h3>
-                  <p className="text-sm text-gray-600">₦500 Mobile Credit</p>
-                </div>
+                {rewardType === 'airtime' && (
+                  <motion.div
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                    className="w-6 h-6 bg-green-600 rounded-full flex items-center justify-center"
+                  >
+                    <CheckCircle className="w-4 h-4 text-white" />
+                  </motion.div>
+                )}
               </motion.button>
 
               <motion.button
                 onClick={() => handleRewardSelect('data')}
-                className="flex items-center space-x-4 p-4 rounded-xl border-2 border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition-all duration-200"
-                whileHover={{ scale: 1.02 }}
+                className={`group flex items-center space-x-4 p-6 rounded-xl border-2 transition-all duration-300 transform ${
+                  rewardType === 'data' 
+                    ? 'border-blue-500 bg-blue-50 shadow-lg scale-105' 
+                    : 'border-gray-200 hover:border-blue-300 hover:bg-blue-50 hover:shadow-md'
+                }`}
+                whileHover={{ scale: rewardType === 'data' ? 1.05 : 1.03 }}
                 whileTap={{ scale: 0.98 }}
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.3, delay: 0.2 }}
               >
-                <div className="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center">
-                  <Wifi className="w-6 h-6 text-white" />
-                </div>
-                <div className="text-left">
-                  <h3 className="font-semibold text-gray-900">Data</h3>
-                  <p className="text-sm text-gray-600">2GB Internet Data</p>
-                </div>
-              </motion.button>
-            </div>
-            
-            {selectedPlatform && rewardType && (
-              <div className="mt-4">
-                <Button
-                  onClick={() => {
-                    handlePost();
-                    setShowRewardDialog(false);
-                  }}
-                  className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                <motion.div 
+                  className={`w-14 h-14 rounded-xl flex items-center justify-center transition-all duration-300 ${
+                    rewardType === 'data' 
+                      ? 'bg-blue-600 shadow-lg' 
+                      : 'bg-blue-500 group-hover:bg-blue-600 group-hover:shadow-lg'
+                  }`}
+                  whileHover={{ rotate: -5 }}
                 >
-                  Post on {selectedPlatform.charAt(0).toUpperCase() + selectedPlatform.slice(1)}
-                </Button>
-              </div>
+                  <Wifi className="w-7 h-7 text-white" />
+                </motion.div>
+                <div className="text-left flex-1">
+                  <h3 className={`font-bold text-lg transition-colors ${
+                    rewardType === 'data' ? 'text-blue-700' : 'text-gray-900 group-hover:text-blue-700'
+                  }`}>
+                    Data Reward
+                  </h3>
+                  <p className="text-sm text-gray-600 group-hover:text-blue-600 transition-colors">
+                    2GB Internet Data
+                  </p>
+                </div>
+                {rewardType === 'data' && (
+                  <motion.div
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                    className="w-6 h-6 bg-blue-600 rounded-full flex items-center justify-center"
+                  >
+                    <CheckCircle className="w-4 h-4 text-white" />
+                  </motion.div>
+                )}
+              </motion.button>
+            </motion.div>
+            
+            {/* Selection Indicator */}
+            <AnimatePresence>
+              {rewardType && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  className={`p-4 rounded-lg border-l-4 ${
+                    rewardType === 'airtime' 
+                      ? 'bg-green-50 border-green-500' 
+                      : 'bg-blue-50 border-blue-500'
+                  }`}
+                >
+                  <div className="flex items-center space-x-2">
+                    <CheckCircle className={`w-5 h-5 ${
+                      rewardType === 'airtime' ? 'text-green-600' : 'text-blue-600'
+                    }`} />
+                    <span className={`font-medium ${
+                      rewardType === 'airtime' ? 'text-green-800' : 'text-blue-800'
+                    }`}>
+                      {rewardType === 'airtime' ? 'Airtime' : 'Data'} reward selected!
+                    </span>
+                  </div>
+                  <p className={`text-sm mt-1 ${
+                    rewardType === 'airtime' ? 'text-green-700' : 'text-blue-700'
+                  }`}>
+                    You'll receive {rewardType === 'airtime' ? '₦500 mobile credit' : '2GB internet data'} after your post is approved.
+                  </p>
+                </motion.div>
+              )}
+            </AnimatePresence>
+            
+            {/* Action Button */}
+            <AnimatePresence>
+              {selectedPlatform && rewardType && (
+                <motion.div 
+                  className="mt-6"
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.9 }}
+                  transition={{ type: "spring", stiffness: 200, damping: 20 }}
+                >
+                  <motion.div
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    <Button
+                      onClick={() => {
+                        handlePost();
+                        setShowRewardDialog(false);
+                      }}
+                      className="w-full h-12 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-300"
+                    >
+                      <Zap className="w-5 h-5 mr-2" />
+                      Post on {selectedPlatform.charAt(0).toUpperCase() + selectedPlatform.slice(1)} & Earn {rewardType === 'airtime' ? 'Airtime' : 'Data'}
+                    </Button>
+                  </motion.div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+            
+            {/* Requirement Notice */}
+            {!rewardType && (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="bg-orange-50 border border-orange-200 rounded-lg p-4 mt-4"
+              >
+                <div className="flex items-center space-x-2">
+                  <Target className="w-5 h-5 text-orange-600" />
+                  <span className="text-orange-800 font-medium text-sm">
+                    Please select your preferred reward type to continue
+                  </span>
+                </div>
+              </motion.div>
             )}
           </DialogContent>
         </Dialog>
