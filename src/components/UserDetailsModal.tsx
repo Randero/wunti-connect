@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import {
   Dialog,
@@ -22,8 +22,12 @@ import {
   CheckCircle,
   XCircle,
   Crown,
-  Settings
+  Settings,
+  DollarSign,
+  TrendingUp,
+  Eye
 } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 
 interface UserDetailsModalProps {
   user: any;
@@ -31,6 +35,16 @@ interface UserDetailsModalProps {
   onClose: () => void;
   onRoleUpdate: (userId: string, newRole: string) => void;
   onAccountAction?: (action: string, userId: string) => void;
+}
+
+interface UserAnalytics {
+  total_earnings: number;
+  total_posts: number;
+  total_visits: number;
+  last_visit_at: string;
+  posts_today: number;
+  posts_this_week: number;
+  posts_this_month: number;
 }
 
 export const UserDetailsModal: React.FC<UserDetailsModalProps> = ({
@@ -41,6 +55,8 @@ export const UserDetailsModal: React.FC<UserDetailsModalProps> = ({
   onAccountAction
 }) => {
   const [selectedRole, setSelectedRole] = useState(user?.role || 'user');
+  const [userAnalytics, setUserAnalytics] = useState<UserAnalytics | null>(null);
+  const [analyticsLoading, setAnalyticsLoading] = useState(false);
 
   // Update selectedRole when user changes
   React.useEffect(() => {
@@ -48,6 +64,37 @@ export const UserDetailsModal: React.FC<UserDetailsModalProps> = ({
       setSelectedRole(user.role);
     }
   }, [user?.role]);
+
+  // Fetch user analytics when modal opens
+  useEffect(() => {
+    if (isOpen && user?.user_id) {
+      fetchUserAnalytics();
+    }
+  }, [isOpen, user?.user_id]);
+
+  const fetchUserAnalytics = async () => {
+    if (!user?.user_id) return;
+    
+    setAnalyticsLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('user_analytics')
+        .select('*')
+        .eq('user_id', user.user_id)
+        .single();
+
+      if (error && error.code !== 'PGRST116') { // PGRST116 is "not found"
+        console.error('Error fetching user analytics:', error);
+        return;
+      }
+
+      setUserAnalytics(data);
+    } catch (error) {
+      console.error('Error fetching user analytics:', error);
+    } finally {
+      setAnalyticsLoading(false);
+    }
+  };
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -177,36 +224,148 @@ export const UserDetailsModal: React.FC<UserDetailsModalProps> = ({
           </TabsContent>
 
           <TabsContent value="activity" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <Clock className="w-5 h-5 text-primary" />
-                  <span>Recent Activity</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="flex items-center space-x-3 p-3 border rounded-lg">
-                    <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                      <User className="w-4 h-4 text-blue-600" />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* User Statistics */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center space-x-2">
+                    <TrendingUp className="w-5 h-5 text-primary" />
+                    <span>User Statistics</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {analyticsLoading ? (
+                    <div className="space-y-4">
+                      {[1, 2, 3, 4].map((i) => (
+                        <div key={i} className="flex justify-between items-center p-3 bg-muted rounded-lg animate-pulse">
+                          <div className="h-4 bg-muted-foreground/20 rounded w-24"></div>
+                          <div className="h-6 bg-muted-foreground/20 rounded w-16"></div>
+                        </div>
+                      ))}
                     </div>
-                    <div className="flex-1">
-                      <p className="font-medium">Account Created</p>
-                      <p className="text-sm text-muted-foreground">{formatDate(user.created_at)}</p>
+                  ) : (
+                    <div className="space-y-4">
+                      <div className="flex justify-between items-center p-3 bg-muted rounded-lg">
+                        <div className="flex items-center space-x-2">
+                          <DollarSign className="w-4 h-4 text-green-600" />
+                          <span className="text-muted-foreground">Total Earnings</span>
+                        </div>
+                        <span className="font-bold text-green-600">
+                          ${userAnalytics?.total_earnings?.toFixed(2) || '0.00'}
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-center p-3 bg-muted rounded-lg">
+                        <div className="flex items-center space-x-2">
+                          <Activity className="w-4 h-4 text-blue-600" />
+                          <span className="text-muted-foreground">Total Posts</span>
+                        </div>
+                        <span className="font-bold text-blue-600">
+                          {userAnalytics?.total_posts || 0}
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-center p-3 bg-muted rounded-lg">
+                        <div className="flex items-center space-x-2">
+                          <Eye className="w-4 h-4 text-purple-600" />
+                          <span className="text-muted-foreground">Total Visits</span>
+                        </div>
+                        <span className="font-bold text-purple-600">
+                          {userAnalytics?.total_visits || 0}
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-center p-3 bg-muted rounded-lg">
+                        <div className="flex items-center space-x-2">
+                          <Clock className="w-4 h-4 text-orange-600" />
+                          <span className="text-muted-foreground">Last Visit</span>
+                        </div>
+                        <span className="font-medium text-orange-600">
+                          {userAnalytics?.last_visit_at 
+                            ? formatDate(userAnalytics.last_visit_at)
+                            : 'Never'
+                          }
+                        </span>
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Recent Activity */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center space-x-2">
+                    <Clock className="w-5 h-5 text-primary" />
+                    <span>Recent Activity</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="flex items-center space-x-3 p-3 border rounded-lg">
+                      <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                        <User className="w-4 h-4 text-blue-600" />
+                      </div>
+                      <div className="flex-1">
+                        <p className="font-medium">Account Created</p>
+                        <p className="text-sm text-muted-foreground">{formatDate(user.created_at)}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center space-x-3 p-3 border rounded-lg">
+                      <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                        <CheckCircle className="w-4 h-4 text-green-600" />
+                      </div>
+                      <div className="flex-1">
+                        <p className="font-medium">Profile Updated</p>
+                        <p className="text-sm text-muted-foreground">{formatDate(user.updated_at)}</p>
+                      </div>
+                    </div>
+                    {userAnalytics?.last_visit_at && (
+                      <div className="flex items-center space-x-3 p-3 border rounded-lg">
+                        <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
+                          <Eye className="w-4 h-4 text-purple-600" />
+                        </div>
+                        <div className="flex-1">
+                          <p className="font-medium">Last Visit</p>
+                          <p className="text-sm text-muted-foreground">{formatDate(userAnalytics.last_visit_at)}</p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Post Analytics */}
+            {userAnalytics && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center space-x-2">
+                    <Activity className="w-5 h-5 text-primary" />
+                    <span>Post Analytics</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="p-4 bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg border border-blue-200">
+                      <div className="flex items-center justify-between">
+                        <span className="text-blue-700 font-medium">Posts Today</span>
+                        <span className="text-2xl font-bold text-blue-600">{userAnalytics.posts_today}</span>
+                      </div>
+                    </div>
+                    <div className="p-4 bg-gradient-to-r from-green-50 to-green-100 rounded-lg border border-green-200">
+                      <div className="flex items-center justify-between">
+                        <span className="text-green-700 font-medium">Posts This Week</span>
+                        <span className="text-2xl font-bold text-green-600">{userAnalytics.posts_this_week}</span>
+                      </div>
+                    </div>
+                    <div className="p-4 bg-gradient-to-r from-purple-50 to-purple-100 rounded-lg border border-purple-200">
+                      <div className="flex items-center justify-between">
+                        <span className="text-purple-700 font-medium">Posts This Month</span>
+                        <span className="text-2xl font-bold text-purple-600">{userAnalytics.posts_this_month}</span>
+                      </div>
                     </div>
                   </div>
-                  <div className="flex items-center space-x-3 p-3 border rounded-lg">
-                    <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-                      <CheckCircle className="w-4 h-4 text-green-600" />
-                    </div>
-                    <div className="flex-1">
-                      <p className="font-medium">Profile Updated</p>
-                      <p className="text-sm text-muted-foreground">{formatDate(user.updated_at)}</p>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            )}
           </TabsContent>
 
           <TabsContent value="permissions" className="space-y-6">

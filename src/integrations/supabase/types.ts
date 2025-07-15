@@ -227,12 +227,14 @@ export type Database = {
           earnings_today: number
           id: string
           last_post_time: string | null
+          last_visit_at: string | null
           next_eligible_post_time: string | null
           posts_this_month: number
           posts_this_week: number
           posts_today: number
           total_earnings: number
           total_posts: number
+          total_visits: number | null
           updated_at: string
           user_id: string
         }
@@ -243,12 +245,14 @@ export type Database = {
           earnings_today?: number
           id?: string
           last_post_time?: string | null
+          last_visit_at?: string | null
           next_eligible_post_time?: string | null
           posts_this_month?: number
           posts_this_week?: number
           posts_today?: number
           total_earnings?: number
           total_posts?: number
+          total_visits?: number | null
           updated_at?: string
           user_id: string
         }
@@ -259,12 +263,14 @@ export type Database = {
           earnings_today?: number
           id?: string
           last_post_time?: string | null
+          last_visit_at?: string | null
           next_eligible_post_time?: string | null
           posts_this_month?: number
           posts_this_week?: number
           posts_today?: number
           total_earnings?: number
           total_posts?: number
+          total_visits?: number | null
           updated_at?: string
           user_id?: string
         }
