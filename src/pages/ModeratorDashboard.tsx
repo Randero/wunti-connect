@@ -48,6 +48,7 @@ interface UserPost {
   selected_images: string[];
   user_email?: string;
   user_name?: string;
+  user_phone?: string;
 }
 
 interface ContactSubmission {
@@ -165,7 +166,7 @@ const ModeratorDashboard = () => {
     if (posts) {
       const { data: profiles, error: profilesError } = await supabase
         .from('profiles')
-        .select('user_id, email, full_name');
+        .select('user_id, email, full_name, phone_number');
 
       if (profilesError) {
         console.error('Error fetching profiles:', profilesError);
@@ -178,7 +179,8 @@ const ModeratorDashboard = () => {
         return {
           ...post,
           user_email: userProfile?.email || 'Unknown',
-          user_name: userProfile?.full_name || 'Unknown User'
+          user_name: userProfile?.full_name || 'Unknown User',
+          user_phone: userProfile?.phone_number || 'No phone',
         };
       });
 
@@ -691,27 +693,33 @@ const ModeratorDashboard = () => {
 
                     <div className="rounded-lg border bg-background/50 backdrop-blur overflow-hidden">
                       <Table>
-                        <TableHeader>
-                          <TableRow className="bg-muted/50">
-                            <TableHead>User</TableHead>
-                            <TableHead>Platform</TableHead>
-                            <TableHead>Post URL</TableHead>
-                            <TableHead>Reward</TableHead>
-                            <TableHead>Status</TableHead>
-                            <TableHead>Earnings</TableHead>
-                            <TableHead>Date</TableHead>
-                            <TableHead>Actions</TableHead>
-                          </TableRow>
-                        </TableHeader>
+                         <TableHeader>
+                           <TableRow className="bg-muted/50">
+                             <TableHead>User</TableHead>
+                             <TableHead>Phone Number</TableHead>
+                             <TableHead>Platform</TableHead>
+                             <TableHead>Post URL</TableHead>
+                             <TableHead>Reward</TableHead>
+                             <TableHead>Status</TableHead>
+                             <TableHead>Earnings</TableHead>
+                             <TableHead>Date</TableHead>
+                             <TableHead>Actions</TableHead>
+                           </TableRow>
+                         </TableHeader>
                         <TableBody>
-                          {filteredPosts.map((post) => (
-                            <TableRow key={post.id} className="hover:bg-muted/30">
-                              <TableCell>
-                                <div>
-                                  <div className="font-medium">{post.user_name}</div>
-                                  <div className="text-sm text-muted-foreground">{post.user_email}</div>
-                                </div>
-                              </TableCell>
+                           {filteredPosts.map((post) => (
+                             <TableRow key={post.id} className="hover:bg-muted/30">
+                               <TableCell>
+                                 <div>
+                                   <div className="font-medium">{post.user_name}</div>
+                                   <div className="text-sm text-muted-foreground">{post.user_email}</div>
+                                 </div>
+                               </TableCell>
+                               <TableCell>
+                                 <div className="text-sm font-medium text-primary">
+                                   {post.user_phone}
+                                 </div>
+                               </TableCell>
                               <TableCell>
                                 <Badge variant="outline" className="capitalize">
                                   {post.social_platform}

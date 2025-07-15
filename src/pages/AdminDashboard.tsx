@@ -70,6 +70,7 @@ interface UserPost {
   // User info for display
   user_email?: string;
   user_name?: string;
+  user_phone?: string;
 }
 
 interface ContactSubmission {
@@ -307,7 +308,7 @@ const AdminDashboard = () => {
       // Then get user profiles separately
       const { data: profilesData, error: profilesError } = await supabase
         .from('profiles')
-        .select('user_id, full_name, email');
+        .select('user_id, full_name, email, phone_number');
 
       if (profilesError) throw profilesError;
 
@@ -321,7 +322,8 @@ const AdminDashboard = () => {
         ...post,
         status: post.status as 'pending' | 'approved' | 'rejected',
         user_email: profileMap[post.user_id]?.email,
-        user_name: profileMap[post.user_id]?.full_name
+        user_name: profileMap[post.user_id]?.full_name,
+        user_phone: profileMap[post.user_id]?.phone_number || 'No phone'
       }));
       
       setUserPosts(enrichedPosts);
@@ -1130,18 +1132,19 @@ const AdminDashboard = () => {
                   <CardContent className="p-0">
                     <div className="overflow-x-auto">
                       <Table>
-                        <TableHeader>
-                          <TableRow className="border-border/50">
-                            <TableHead className="font-semibold">User</TableHead>
-                            <TableHead className="font-semibold">Platform</TableHead>
-                            <TableHead className="font-semibold">Post URL</TableHead>
-                            <TableHead className="font-semibold">Reward Type</TableHead>
-                            <TableHead className="font-semibold">Status</TableHead>
-                            <TableHead className="font-semibold">Earnings</TableHead>
-                            <TableHead className="font-semibold">Date</TableHead>
-                            <TableHead className="font-semibold text-center">Actions</TableHead>
-                          </TableRow>
-                        </TableHeader>
+                         <TableHeader>
+                           <TableRow className="border-border/50">
+                             <TableHead className="font-semibold">User</TableHead>
+                             <TableHead className="font-semibold">Phone Number</TableHead>
+                             <TableHead className="font-semibold">Platform</TableHead>
+                             <TableHead className="font-semibold">Post URL</TableHead>
+                             <TableHead className="font-semibold">Reward Type</TableHead>
+                             <TableHead className="font-semibold">Status</TableHead>
+                             <TableHead className="font-semibold">Earnings</TableHead>
+                             <TableHead className="font-semibold">Date</TableHead>
+                             <TableHead className="font-semibold text-center">Actions</TableHead>
+                           </TableRow>
+                         </TableHeader>
                         <TableBody>
                           {filteredPosts.map((post, index) => (
                             <motion.tr
@@ -1151,17 +1154,22 @@ const AdminDashboard = () => {
                               transition={{ delay: index * 0.05 }}
                               className="border-border/50 hover:bg-muted/50"
                             >
-                              <TableCell>
-                                <div className="flex items-center space-x-3">
-                                  <div className="w-8 h-8 bg-gradient-to-br from-primary to-secondary rounded-full flex items-center justify-center text-white font-bold text-sm">
-                                    {(post.user_name?.charAt(0) || post.user_email?.charAt(0) || 'U').toUpperCase()}
-                                  </div>
-                                  <div>
-                                    <p className="font-medium">{post.user_name || 'Unknown User'}</p>
-                                    <p className="text-sm text-muted-foreground">{post.user_email}</p>
-                                  </div>
-                                </div>
-                              </TableCell>
+                               <TableCell>
+                                 <div className="flex items-center space-x-3">
+                                   <div className="w-8 h-8 bg-gradient-to-br from-primary to-secondary rounded-full flex items-center justify-center text-white font-bold text-sm">
+                                     {(post.user_name?.charAt(0) || post.user_email?.charAt(0) || 'U').toUpperCase()}
+                                   </div>
+                                   <div>
+                                     <p className="font-medium">{post.user_name || 'Unknown User'}</p>
+                                     <p className="text-sm text-muted-foreground">{post.user_email}</p>
+                                   </div>
+                                 </div>
+                               </TableCell>
+                               <TableCell>
+                                 <div className="text-sm font-medium text-primary">
+                                   {post.user_phone}
+                                 </div>
+                               </TableCell>
                               <TableCell>
                                 <Badge variant="outline" className="capitalize">
                                   {post.social_platform}
