@@ -1237,7 +1237,7 @@ const AdminDashboard = () => {
                               <TableCell>
                                 <div className="flex items-center space-x-1">
                                   <DollarSign className="w-4 h-4 text-green-500" />
-                                  <span className="font-medium">{post.earnings || 0}</span>
+                                  <span className="font-medium">₦{post.earnings || 0}</span>
                                 </div>
                               </TableCell>
                               <TableCell>
@@ -1249,11 +1249,16 @@ const AdminDashboard = () => {
                                 <div className="flex items-center space-x-2">
                                   {post.status === 'pending' && (
                                     <>
-                                      <Button
-                                        size="sm"
-                                        onClick={() => updatePostStatus(post.id, 'approved', 10)}
-                                        className="bg-green-500 hover:bg-green-600 text-white"
-                                      >
+                                       <Button
+                                         size="sm"
+                                         onClick={() => {
+                                           const rewardAmount = post.social_platform === 'facebook' ? 200 : 
+                                                               post.social_platform === 'instagram' ? 500 : 
+                                                               post.social_platform === 'twitter' ? 700 : 200;
+                                           updatePostStatus(post.id, 'approved', rewardAmount);
+                                         }}
+                                         className="bg-green-500 hover:bg-green-600 text-white"
+                                       >
                                         <CheckCircle className="w-3 h-3 mr-1" />
                                         Approve
                                       </Button>

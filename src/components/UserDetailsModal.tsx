@@ -251,7 +251,7 @@ export const UserDetailsModal: React.FC<UserDetailsModalProps> = ({
                           <span className="text-muted-foreground">Total Earnings</span>
                         </div>
                         <span className="font-bold text-green-600">
-                          ${userAnalytics?.total_earnings?.toFixed(2) || '0.00'}
+                          ₦{userAnalytics?.total_earnings?.toFixed(2) || '0.00'}
                         </span>
                       </div>
                       <div className="flex justify-between items-center p-3 bg-muted rounded-lg">
