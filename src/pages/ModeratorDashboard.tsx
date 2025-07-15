@@ -272,8 +272,10 @@ const ModeratorDashboard = () => {
 
   const updatePostStatus = async (postId: string, newStatus: 'approved' | 'rejected', earnings?: number) => {
     const updateData: any = { status: newStatus };
-    if (newStatus === 'approved' && earnings !== undefined) {
-      updateData.earnings = earnings;
+    if (newStatus === 'approved') {
+      updateData.earnings = earnings || 500; // Default earnings
+    } else if (newStatus === 'rejected') {
+      updateData.earnings = 0; // No earnings for rejected posts
     }
 
     const { error } = await supabase
@@ -293,7 +295,7 @@ const ModeratorDashboard = () => {
 
     toast({
       title: "Success",
-      description: `Post ${newStatus} successfully`,
+      description: `Post ${newStatus} successfully${newStatus === 'approved' ? ` - ₦${earnings || 500} earnings awarded` : ''}`,
     });
 
     fetchUserPosts();

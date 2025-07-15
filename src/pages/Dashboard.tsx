@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { 
   User, 
-  Image, 
+  Image as ImageIcon, 
   Share2, 
   DollarSign, 
   Facebook, 
@@ -204,7 +204,7 @@ const Dashboard = () => {
 
       toast({
         title: "Post Submitted Successfully!",
-        description: "Your post is now under review. You'll be notified once it's approved.",
+        description: "Your post is now under review by our moderators. Check your post history for updates.",
       });
 
       // Reset form
@@ -425,7 +425,7 @@ const Dashboard = () => {
         <Tabs defaultValue="gallery" className="space-y-8">
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="gallery" className="flex items-center space-x-2">
-              <Image className="w-4 h-4" />
+              <ImageIcon className="w-4 h-4" />
               <span>Gallery & Post</span>
             </TabsTrigger>
             <TabsTrigger value="analytics" className="flex items-center space-x-2">
@@ -449,7 +449,7 @@ const Dashboard = () => {
               <Card className="bg-gradient-to-br from-blue-50 to-purple-50 border-blue-200">
                 <CardHeader>
                   <CardTitle className="flex items-center space-x-2 text-blue-700">
-                    <Image className="w-6 h-6" />
+                    <ImageIcon className="w-6 h-6" />
                     <span>Select 2 Images for Social Media Post</span>
                   </CardTitle>
                   <CardDescription className="text-blue-600">
@@ -457,46 +457,59 @@ const Dashboard = () => {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-6">
-                    {galleryImages.map((image) => {
-                      const isSelected = selectedImages.some(selected => selected.id === image.id);
-                      return (
-                        <motion.div
-                          key={image.id}
-                          onClick={() => handleImageSelection(image)}
-                          className={`cursor-pointer rounded-xl overflow-hidden border-2 transition-all duration-200 ${
-                            isSelected
-                              ? 'border-blue-500 shadow-lg scale-105'
-                              : selectedImages.length >= 2 
-                                ? 'border-gray-200 opacity-50 cursor-not-allowed'
-                                : 'border-gray-200 hover:border-gray-300'
-                          }`}
-                          whileHover={{ scale: isSelected ? 1.05 : selectedImages.length >= 2 ? 1 : 1.02 }}
-                          whileTap={{ scale: 0.98 }}
-                        >
-                          <div className="aspect-square relative">
-                            <img
-                              src={image.image_url}
-                              alt={image.title}
-                              className="w-full h-full object-cover"
-                            />
-                            {isSelected && (
-                              <div className="absolute inset-0 bg-blue-500/20 flex items-center justify-center">
-                                <div className="bg-blue-500 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold">
-                                  {selectedImages.findIndex(selected => selected.id === image.id) + 1}
+                  {galleryImages.length === 0 ? (
+                    <div className="text-center py-12">
+                      <ImageIcon className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                      <h3 className="text-lg font-medium text-gray-900 mb-2">No gallery images available</h3>
+                      <p className="text-gray-600">Gallery images will appear here once added by administrators</p>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-6">
+                      {galleryImages.map((image) => {
+                        const isSelected = selectedImages.some(selected => selected.id === image.id);
+                        return (
+                          <motion.div
+                            key={image.id}
+                            onClick={() => handleImageSelection(image)}
+                            className={`cursor-pointer rounded-xl overflow-hidden border-2 transition-all duration-200 ${
+                              isSelected
+                                ? 'border-blue-500 shadow-lg scale-105'
+                                : selectedImages.length >= 2 
+                                  ? 'border-gray-200 opacity-50 cursor-not-allowed'
+                                  : 'border-gray-200 hover:border-gray-300'
+                            }`}
+                            whileHover={{ scale: isSelected ? 1.05 : selectedImages.length >= 2 ? 1 : 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                          >
+                            <div className="aspect-square relative">
+                              <img
+                                src={image.image_url}
+                                alt={image.title}
+                                className="w-full h-full object-cover"
+                                onError={(e) => {
+                                  console.error('Image failed to load:', image.image_url);
+                                  e.currentTarget.src = '/placeholder.svg';
+                                }}
+                              />
+                              {isSelected && (
+                                <div className="absolute inset-0 bg-blue-500/20 flex items-center justify-center">
+                                  <div className="bg-blue-500 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold">
+                                    {selectedImages.findIndex(selected => selected.id === image.id) + 1}
+                                  </div>
                                 </div>
-                              </div>
-                            )}
-                          </div>
-                          <div className="p-3">
-                            <p className="text-sm font-medium text-gray-900 truncate">
-                              {image.title}
-                            </p>
-                          </div>
-                        </motion.div>
-                      );
-                    })}
-                  </div>
+                              )}
+                            </div>
+                            <div className="p-3">
+                              <h4 className="font-medium text-gray-900 text-sm truncate">{image.title}</h4>
+                              {image.caption && (
+                                <p className="text-xs text-gray-600 mt-1 line-clamp-2">{image.caption}</p>
+                              )}
+                            </div>
+                          </motion.div>
+                        );
+                      })}
+                    </div>
+                  )}
 
                   {/* Selected Images Preview */}
                   {selectedImages.length > 0 && (
@@ -554,15 +567,19 @@ const Dashboard = () => {
                   <CardContent className="space-y-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Post URL (After posting on {selectedPlatform}, paste the link here)
+                        Post URL (After posting on {selectedPlatform}, paste the link here) *
                       </label>
                       <input
                         type="url"
                         value={postUrl}
                         onChange={(e) => setPostUrl(e.target.value)}
-                        placeholder="https://..."
+                        placeholder={`https://${selectedPlatform}.com/...`}
                         className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        required
                       />
+                      <p className="text-xs text-gray-500 mt-1">
+                        Copy the exact URL of your {selectedPlatform} post and paste it here
+                      </p>
                     </div>
 
                     <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-4 rounded-xl border border-blue-200">
@@ -571,7 +588,8 @@ const Dashboard = () => {
                         <li>• Post both selected images with their captions</li>
                         <li>• Include hashtags: #AliyuCambat #Vote2024 #PositiveChange</li>
                         <li>• Copy the post link immediately after posting</li>
-                        <li>• Reward: {rewardType === 'airtime' ? '₦500 Airtime' : '2GB Data'}</li>
+                        <li>• Your submission will be reviewed within 24 hours</li>
+                        <li>• Reward after approval: {rewardType === 'airtime' ? '₦500 Airtime' : '2GB Data'}</li>
                       </ul>
                       
                       {selectedImages.length > 0 && (
