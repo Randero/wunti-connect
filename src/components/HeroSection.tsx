@@ -19,13 +19,13 @@ const HeroSection = () => {
     },
     {
       id: 2,
-      url: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=800&h=600&fit=crop",
+      url: "KC/theblue.png",
       title: "Community Focus",
       description: "Serving the people with dedication and integrity"
     },
     {
       id: 3,
-      url: "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=800&h=600&fit=crop",
+      url: "KC/gut.png",
       title: "Engineering Excellence",
       description: "Technical expertise for practical solutions"
     }
