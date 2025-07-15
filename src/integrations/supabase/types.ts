@@ -216,11 +216,148 @@ export type Database = {
         }
         Relationships: []
       }
+      user_analytics: {
+        Row: {
+          created_at: string
+          earnings_this_month: number
+          earnings_this_week: number
+          earnings_today: number
+          id: string
+          last_post_time: string | null
+          next_eligible_post_time: string | null
+          posts_this_month: number
+          posts_this_week: number
+          posts_today: number
+          total_earnings: number
+          total_posts: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          earnings_this_month?: number
+          earnings_this_week?: number
+          earnings_today?: number
+          id?: string
+          last_post_time?: string | null
+          next_eligible_post_time?: string | null
+          posts_this_month?: number
+          posts_this_week?: number
+          posts_today?: number
+          total_earnings?: number
+          total_posts?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          earnings_this_month?: number
+          earnings_this_week?: number
+          earnings_today?: number
+          id?: string
+          last_post_time?: string | null
+          next_eligible_post_time?: string | null
+          posts_this_month?: number
+          posts_this_week?: number
+          posts_today?: number
+          total_earnings?: number
+          total_posts?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_levels: {
+        Row: {
+          created_at: string
+          current_level: number
+          experience_points: number
+          id: string
+          next_level_threshold: number
+          total_earnings: number
+          total_posts: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          current_level?: number
+          experience_points?: number
+          id?: string
+          next_level_threshold?: number
+          total_earnings?: number
+          total_posts?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          current_level?: number
+          experience_points?: number
+          id?: string
+          next_level_threshold?: number
+          total_earnings?: number
+          total_posts?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_posts: {
+        Row: {
+          created_at: string
+          earnings: number | null
+          id: string
+          last_post_date: string | null
+          post_url: string
+          reward_type: string
+          selected_images: string[]
+          social_platform: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          earnings?: number | null
+          id?: string
+          last_post_date?: string | null
+          post_url: string
+          reward_type: string
+          selected_images: string[]
+          social_platform: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          earnings?: number | null
+          id?: string
+          last_post_date?: string | null
+          post_url?: string
+          reward_type?: string
+          selected_images?: string[]
+          social_platform?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
+      calculate_user_level: {
+        Args: { user_id: string }
+        Returns: number
+      }
+      can_user_post: {
+        Args: { user_id: string }
+        Returns: boolean
+      }
       check_contact_rate_limit: {
         Args: { client_ip: unknown }
         Returns: boolean
@@ -239,6 +376,10 @@ export type Database = {
       }
       is_valid_email: {
         Args: { email: string }
+        Returns: boolean
+      }
+      is_valid_post_url: {
+        Args: { url: string; platform: string }
         Returns: boolean
       }
       request_password_reset: {

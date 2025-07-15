@@ -66,10 +66,42 @@ const Dashboard = () => {
   useEffect(() => {
     if (user) {
       fetchGalleryImages();
+      fetchUserAnalytics();
     }
   }, [user]);
 
-  // Remove user posts functionality as table doesn't exist yet
+  const [userPosts, setUserPosts] = useState<any[]>([]);
+
+  const fetchUserAnalytics = async () => {
+    try {
+      const { data: posts, error } = await supabase
+        .from('user_posts')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Error fetching user posts:', error);
+        return;
+      }
+
+      setUserPosts(posts || []);
+      
+      // Update analytics
+      const totalEarnings = posts?.filter(p => p.status === 'approved').reduce((sum, p) => sum + (p.earnings || 0), 0) || 0;
+      const approvedPosts = posts?.filter(p => p.status === 'approved').length || 0;
+      const pendingPosts = posts?.filter(p => p.status === 'pending').length || 0;
+      
+      setAnalytics({
+        totalEarnings,
+        postsSubmitted: posts?.length || 0,
+        approvedPosts,
+        pendingReviews: pendingPosts
+      });
+    } catch (error) {
+      console.error('Error fetching analytics:', error);
+    }
+  };
 
   const fetchGalleryImages = async () => {
     try {
@@ -138,16 +170,62 @@ const Dashboard = () => {
   };
 
   const handleSubmitPost = async () => {
-    toast({
-      title: "Feature Coming Soon",
-      description: "Post submission feature will be available soon!",
-    });
-    
-    // Reset form for now
-    setSelectedImages([]);
-    setSelectedPlatform('');
-    setRewardType('');
-    setPostUrl('');
+    if (!postUrl || !selectedPlatform || !rewardType || selectedImages.length !== 2) {
+      toast({
+        title: "Missing Information",
+        description: "Please fill all required fields and select 2 images.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('user_posts')
+        .insert({
+          user_id: user.id,
+          post_url: postUrl,
+          social_platform: selectedPlatform,
+          reward_type: rewardType,
+          selected_images: selectedImages.map(img => img.image_url),
+          status: 'pending'
+        });
+
+      if (error) {
+        console.error('Error submitting post:', error);
+        toast({
+          title: "Submission Failed",
+          description: "There was an error submitting your post. Please try again.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      toast({
+        title: "Post Submitted Successfully!",
+        description: "Your post is now under review. You'll be notified once it's approved.",
+      });
+
+      // Reset form
+      setSelectedImages([]);
+      setSelectedPlatform('');
+      setRewardType('');
+      setPostUrl('');
+      
+      // Refresh analytics
+      await fetchUserAnalytics();
+      
+    } catch (error) {
+      console.error('Error submitting post:', error);
+      toast({
+        title: "Submission Failed",
+        description: "There was an error submitting your post. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleLogout = async () => {
@@ -187,7 +265,10 @@ const Dashboard = () => {
       twitter: 'https://twitter.com/intent/tweet?text='
     };
 
-    const campaignText = encodeURIComponent('Supporting Engr. Aliyu Muhammed Cambat for positive change! #AliyuCambat #Vote2024');
+    const campaignText = 'Supporting Engr. Aliyu Muhammed Cambat for positive change! #AliyuCambat #Vote2024';
+    
+    // Create suggested caption
+    const suggestedCaption = `${campaignText}\n\nJoin the movement for positive change in our community! 🇳🇬\n\n#AliyuCambat #Vote2024 #Leadership #Change #Community`;
     
     let url = '';
     switch (platform) {
@@ -196,9 +277,16 @@ const Dashboard = () => {
         break;
       case 'instagram':
         url = baseUrls.instagram;
+        // Copy caption to clipboard for Instagram
+        navigator.clipboard.writeText(suggestedCaption).then(() => {
+          toast({
+            title: "Caption Copied!",
+            description: "Suggested caption has been copied to your clipboard. Paste it with your Instagram post.",
+          });
+        });
         break;
       case 'twitter':
-        url = `${baseUrls.twitter}${campaignText}`;
+        url = `${baseUrls.twitter}${encodeURIComponent(campaignText)}`;
         break;
     }
 
@@ -602,14 +690,55 @@ const Dashboard = () => {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-center py-12">
-                    <Share2 className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">No posts yet</h3>
-                    <p className="text-gray-600 mb-6">Start sharing campaign content to earn rewards!</p>
-                    <Button onClick={() => setSelectedImages([])} variant="outline">
-                      Share Your First Post
-                    </Button>
-                  </div>
+                  {userPosts.length === 0 ? (
+                    <div className="text-center py-12">
+                      <Share2 className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                      <h3 className="text-lg font-medium text-gray-900 mb-2">No posts yet</h3>
+                      <p className="text-gray-600 mb-6">Start sharing campaign content to earn rewards!</p>
+                      <Button onClick={() => setSelectedImages([])} variant="outline">
+                        Share Your First Post
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {userPosts.map((post) => {
+                        const StatusIcon = getStatusIcon(post.status);
+                        const PlatformIcon = getPlatformIcon(post.social_platform);
+                        return (
+                          <div key={post.id} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                            <div className="flex items-center space-x-4">
+                              <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
+                                <PlatformIcon className="w-5 h-5 text-gray-600" />
+                              </div>
+                              <div>
+                                <p className="font-medium text-gray-900 capitalize">{post.social_platform}</p>
+                                <p className="text-sm text-gray-600">
+                                  {new Date(post.created_at).toLocaleDateString('en-US', {
+                                    year: 'numeric',
+                                    month: 'short',
+                                    day: 'numeric',
+                                    hour: '2-digit',
+                                    minute: '2-digit'
+                                  })}
+                                </p>
+                              </div>
+                            </div>
+                            <div className="flex items-center space-x-4">
+                              <Badge className={`${getStatusColor(post.status)} font-medium`}>
+                                <StatusIcon className="w-3 h-3 mr-1" />
+                                {post.status.charAt(0).toUpperCase() + post.status.slice(1)}
+                              </Badge>
+                              {post.status === 'approved' && (
+                                <div className="text-green-600 font-semibold">
+                                  +₦{post.earnings || 500}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </motion.div>
