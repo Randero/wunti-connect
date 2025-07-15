@@ -259,12 +259,6 @@ const Dashboard = () => {
   };
 
   const openSocialMediaPost = (platform: string, imageUrl: string) => {
-    const baseUrls = {
-      facebook: 'https://www.facebook.com/sharer/sharer.php?u=',
-      instagram: 'https://www.instagram.com/',
-      twitter: 'https://twitter.com/intent/tweet?text='
-    };
-
     const campaignText = 'Supporting Engr. Aliyu Muhammed Cambat for positive change! #AliyuCambat #Vote2024';
     
     // Create suggested caption
@@ -273,20 +267,45 @@ const Dashboard = () => {
     let url = '';
     switch (platform) {
       case 'facebook':
-        url = `${baseUrls.facebook}${encodeURIComponent(window.location.origin)}`;
+        // Direct to Facebook's create post page
+        url = 'https://www.facebook.com/';
+        // Copy caption to clipboard for Facebook
+        navigator.clipboard.writeText(suggestedCaption).then(() => {
+          toast({
+            title: "Caption Copied!",
+            description: "Suggested caption copied to clipboard. Paste it with your Facebook post.",
+          });
+        });
         break;
       case 'instagram':
-        url = baseUrls.instagram;
+        // Direct to Instagram (will open app if available, otherwise web)
+        url = 'https://www.instagram.com/';
         // Copy caption to clipboard for Instagram
         navigator.clipboard.writeText(suggestedCaption).then(() => {
           toast({
             title: "Caption Copied!",
-            description: "Suggested caption has been copied to your clipboard. Paste it with your Instagram post.",
+            description: "Suggested caption copied to clipboard. Paste it with your Instagram post.",
           });
         });
         break;
       case 'twitter':
-        url = `${baseUrls.twitter}${encodeURIComponent(campaignText)}`;
+        // Direct to Twitter compose with pre-filled text
+        url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(campaignText)}`;
+        break;
+      case 'whatsapp':
+        // Direct to WhatsApp with pre-filled text
+        url = `https://api.whatsapp.com/send?text=${encodeURIComponent(suggestedCaption)}`;
+        break;
+      case 'linkedin':
+        // Direct to LinkedIn share page
+        url = 'https://www.linkedin.com/sharing/share-offsite/';
+        // Copy caption to clipboard for LinkedIn
+        navigator.clipboard.writeText(suggestedCaption).then(() => {
+          toast({
+            title: "Caption Copied!",
+            description: "Suggested caption copied to clipboard. Paste it with your LinkedIn post.",
+          });
+        });
         break;
     }
 
