@@ -138,7 +138,23 @@ const PostSubmissionForm: React.FC<PostSubmissionFormProps> = ({
   };
 
   const openSocialMedia = () => {
-    window.open(config?.url, '_blank');
+    if (platform === 'instagram') {
+      // Open Instagram with caption suggestion
+      const caption = "🎯 Supporting our campaign! Join us in making a difference. #Vote2024 #Campaign #Community";
+      window.open('https://www.instagram.com', '_blank');
+      
+      // Show toast with caption to copy
+      toast({
+        title: "Instagram Opened",
+        description: "Suggested caption copied to clipboard. Upload your selected images and paste the caption!",
+        duration: 6000,
+      });
+      
+      // Copy caption to clipboard
+      navigator.clipboard.writeText(caption);
+    } else {
+      window.open(config?.url, '_blank');
+    }
     setStep('submit');
   };
 

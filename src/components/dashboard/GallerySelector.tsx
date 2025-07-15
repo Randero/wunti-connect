@@ -301,6 +301,40 @@ const GallerySelector: React.FC<GallerySelectorProps> = ({
         )}
       </AnimatePresence>
 
+      {/* Post Submission Section */}
+      {selectedImages.length >= 2 && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-gradient-to-r from-green-500/10 to-blue-500/10 rounded-2xl p-6 border border-green-500/20 space-y-4"
+        >
+          <div className="text-center">
+            <h3 className="text-lg font-semibold text-green-700 mb-2">✨ Ready to Post!</h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              You've selected {selectedImages.length} images. Click below to choose your platform and submit your post.
+            </p>
+            
+            {/* Selected Images Preview */}
+            <div className="flex flex-wrap justify-center gap-2 mb-4">
+              {selectedImages.slice(0, 3).map((image, index) => (
+                <div key={image.id} className="relative">
+                  <img
+                    src={image.image_url}
+                    alt={image.title}
+                    className="w-16 h-16 md:w-20 md:h-20 object-cover rounded-lg border-2 border-green-500/30"
+                  />
+                  {selectedImages.length > 3 && index === 2 && (
+                    <div className="absolute inset-0 bg-black/60 rounded-lg flex items-center justify-center">
+                      <span className="text-white text-sm font-bold">+{selectedImages.length - 3}</span>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        </motion.div>
+      )}
+
       {/* Selection Summary */}
       {selectedImages.length > 0 && (
         <motion.div

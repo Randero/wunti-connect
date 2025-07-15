@@ -280,14 +280,25 @@ const ModernDashboard = () => {
           </Button>
         </div>
 
-        {/* Analytics Overview - Moved to top */}
-        {userAnalytics && (
-          <AnalyticsCards 
-            analytics={userAnalytics} 
-            canPost={canPost}
-            nextPostCountdown={nextPostCountdown}
-          />
-        )}
+        {/* Analytics Overview - Real-time Dashboard */}
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          className="mb-6"
+        >
+          <div className="text-center mb-4">
+            <h2 className="text-lg md:text-xl font-bold text-white mb-2">📊 Live Analytics Dashboard</h2>
+            <p className="text-gray-300 text-sm">Real-time insights into your campaign performance</p>
+          </div>
+          {userAnalytics && (
+            <AnalyticsCards 
+              analytics={userAnalytics} 
+              canPost={canPost}
+              nextPostCountdown={nextPostCountdown}
+            />
+          )}
+        </motion.div>
 
         {/* User Level Display */}
         {userLevel && <UserLevelDisplay userLevel={userLevel} />}
