@@ -19,12 +19,64 @@ interface GallerySelectorProps {
   onImageSelection: (images: GalleryImage[]) => void;
 }
 
+// Sample campaign images for testing
+const sampleImages: GalleryImage[] = [
+  {
+    id: 'sample-1',
+    title: 'Professional Leadership',
+    image_url: 'https://images.unsplash.com/photo-1649972904349-6e44c42644a7?w=600&h=600&fit=crop&crop=face',
+    caption: 'Strong leadership for a better tomorrow'
+  },
+  {
+    id: 'sample-2',
+    title: 'Innovation & Technology',
+    image_url: 'https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?w=600&h=600&fit=crop',
+    caption: 'Embracing digital transformation'
+  },
+  {
+    id: 'sample-3',
+    title: 'Progress & Development',
+    image_url: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=600&h=600&fit=crop',
+    caption: 'Building the infrastructure of tomorrow'
+  },
+  {
+    id: 'sample-4',
+    title: 'Education & Learning',
+    image_url: 'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=600&h=600&fit=crop',
+    caption: 'Investing in knowledge and skills'
+  },
+  {
+    id: 'sample-5',
+    title: 'Youth Empowerment',
+    image_url: 'https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?w=600&h=600&fit=crop',
+    caption: 'Empowering the next generation'
+  },
+  {
+    id: 'sample-6',
+    title: 'Community Unity',
+    image_url: 'https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=600&h=600&fit=crop&crop=face',
+    caption: 'Building stronger communities together'
+  },
+  {
+    id: 'sample-7',
+    title: 'Economic Growth',
+    image_url: 'https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=600&h=600&fit=crop',
+    caption: 'Driving sustainable economic development'
+  },
+  {
+    id: 'sample-8',
+    title: 'Healthcare Excellence',
+    image_url: 'https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=600&h=600&fit=crop',
+    caption: 'Quality healthcare for all citizens'
+  }
+];
+
 const GallerySelector: React.FC<GallerySelectorProps> = ({ 
   selectedImages, 
   onImageSelection 
 }) => {
-  const [galleryImages, setGalleryImages] = useState<GalleryImage[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [galleryImages, setGalleryImages] = useState<GalleryImage[]>(sampleImages);
+  const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -40,13 +92,19 @@ const GallerySelector: React.FC<GallerySelectorProps> = ({
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setGalleryImages(data || []);
+      
+      // Combine database images with sample images for testing
+      const dbImages = data || [];
+      const combinedImages = [...dbImages, ...sampleImages];
+      setGalleryImages(combinedImages);
     } catch (error) {
       console.error('Error fetching gallery:', error);
+      // Use sample images as fallback
+      setGalleryImages(sampleImages);
       toast({
-        title: "Error",
-        description: "Failed to load campaign images",
-        variant: "destructive"
+        title: "Using Sample Images",
+        description: "Displaying demo campaign images for testing",
+        variant: "default"
       });
     } finally {
       setLoading(false);
