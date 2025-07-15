@@ -17,6 +17,7 @@ interface GalleryImage {
 interface GallerySelectorProps {
   selectedImages: GalleryImage[];
   onImageSelection: (images: GalleryImage[]) => void;
+  onProceed: () => void;
 }
 
 // Sample campaign images for testing
@@ -73,7 +74,8 @@ const sampleImages: GalleryImage[] = [
 
 const GallerySelector: React.FC<GallerySelectorProps> = ({ 
   selectedImages, 
-  onImageSelection 
+  onImageSelection,
+  onProceed 
 }) => {
   const [galleryImages, setGalleryImages] = useState<GalleryImage[]>(sampleImages);
   const [loading, setLoading] = useState(false);
@@ -288,6 +290,7 @@ const GallerySelector: React.FC<GallerySelectorProps> = ({
             className="flex justify-center"
           >
             <Button
+              onClick={onProceed}
               size="lg"
               className="bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 text-white font-bold text-lg px-8 py-4 rounded-full shadow-lg hover:shadow-xl transition-all duration-300"
             >

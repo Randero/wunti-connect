@@ -154,7 +154,10 @@ const ModernDashboard = () => {
 
   const handleImageSelection = (images: any[]) => {
     setSelectedImages(images);
-    if (images.length >= 2) {
+  };
+
+  const handleProceed = () => {
+    if (selectedImages.length >= 2) {
       setShowPlatforms(true);
     }
   };
@@ -198,15 +201,18 @@ const ModernDashboard = () => {
 
       if (error) throw error;
 
+      // Success animation/message
       toast({
         title: "✨ Submitted Successfully!",
-        description: "Go back to your activities and patiently wait as your transaction is being processed",
+        description: "Go back to your activities and patiently wait as your transaction is being processed. Status: PENDING",
+        duration: 5000,
       });
 
       // Reset form
       setSelectedImages([]);
       setSelectedPlatform('');
       setShowSubmissionForm(false);
+      setShowPlatforms(false);
       
       // Refresh user data
       fetchUserData();
@@ -330,6 +336,7 @@ const ModernDashboard = () => {
                     <GallerySelector
                       selectedImages={selectedImages}
                       onImageSelection={handleImageSelection}
+                      onProceed={handleProceed}
                     />
                   )}
                 </CardContent>
