@@ -40,6 +40,13 @@ export const UserDetailsModal: React.FC<UserDetailsModalProps> = ({
 }) => {
   const [selectedRole, setSelectedRole] = useState(user?.role || 'user');
 
+  // Update selectedRole when user changes
+  React.useEffect(() => {
+    if (user?.role) {
+      setSelectedRole(user.role);
+    }
+  }, [user?.role]);
+
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
@@ -243,7 +250,10 @@ export const UserDetailsModal: React.FC<UserDetailsModalProps> = ({
                     className="pt-4 border-t"
                   >
                     <Button
-                      onClick={() => onRoleUpdate(user.user_id, selectedRole)}
+                      onClick={() => {
+                        onRoleUpdate(user.user_id, selectedRole);
+                        setSelectedRole(selectedRole);
+                      }}
                       className="w-full"
                     >
                       Update Role to {selectedRole}

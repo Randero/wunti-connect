@@ -56,6 +56,21 @@ interface User {
   updated_at: string;
 }
 
+interface UserPost {
+  id: string;
+  user_id: string;
+  post_url: string;
+  social_platform: string;
+  reward_type: string;
+  status: 'pending' | 'approved' | 'rejected';
+  earnings: number;
+  created_at: string;
+  selected_images: string[];
+  // User info for display
+  user_email?: string;
+  user_name?: string;
+}
+
 interface ContactSubmission {
   id: string;
   name: string;
@@ -84,15 +99,19 @@ const AdminDashboard = () => {
   const [galleryImages, setGalleryImages] = useState<GalleryImage[]>([]);
   const [users, setUsers] = useState<User[]>([]);
   const [contactSubmissions, setContactSubmissions] = useState<ContactSubmission[]>([]);
+  const [userPosts, setUserPosts] = useState<UserPost[]>([]);
   const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
   const [filteredSubmissions, setFilteredSubmissions] = useState<ContactSubmission[]>([]);
+  const [filteredPosts, setFilteredPosts] = useState<UserPost[]>([]);
   const [loading, setLoading] = useState(false);
   
   // Search and filter state
   const [userSearchTerm, setUserSearchTerm] = useState('');
   const [submissionSearchTerm, setSubmissionSearchTerm] = useState('');
+  const [postSearchTerm, setPostSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [roleFilter, setRoleFilter] = useState('all');
+  const [postStatusFilter, setPostStatusFilter] = useState('all');
   
   // Modal state
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
@@ -111,7 +130,11 @@ const AdminDashboard = () => {
     totalMessages: 0,
     pendingMessages: 0,
     activeImages: 0,
-    totalImages: 0
+    totalImages: 0,
+    totalPosts: 0,
+    pendingPosts: 0,
+    approvedPosts: 0,
+    totalEarnings: 0
   });
 
   useEffect(() => {
@@ -163,11 +186,32 @@ const AdminDashboard = () => {
     setFilteredSubmissions(filtered);
   }, [contactSubmissions, submissionSearchTerm, statusFilter]);
 
+  // Filter posts based on search and status
+  useEffect(() => {
+    let filtered = userPosts;
+    
+    if (postSearchTerm) {
+      filtered = filtered.filter(post => 
+        post.user_email?.toLowerCase().includes(postSearchTerm.toLowerCase()) ||
+        post.user_name?.toLowerCase().includes(postSearchTerm.toLowerCase()) ||
+        post.social_platform?.toLowerCase().includes(postSearchTerm.toLowerCase()) ||
+        post.post_url?.toLowerCase().includes(postSearchTerm.toLowerCase())
+      );
+    }
+    
+    if (postStatusFilter !== 'all') {
+      filtered = filtered.filter(post => post.status === postStatusFilter);
+    }
+    
+    setFilteredPosts(filtered);
+  }, [userPosts, postSearchTerm, postStatusFilter]);
+
   const fetchAllData = async () => {
     await Promise.all([
       fetchGalleryImages(),
       fetchUsers(),
-      fetchContactSubmissions()
+      fetchContactSubmissions(),
+      fetchUserPosts()
     ]);
   };
 
@@ -318,6 +362,84 @@ const AdminDashboard = () => {
       });
 
       fetchGalleryImages();
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
+
+  const fetchUserPosts = async () => {
+    try {
+      // First get the posts
+      const { data: postsData, error: postsError } = await supabase
+        .from('user_posts')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (postsError) throw postsError;
+      
+      // Then get user profiles separately
+      const { data: profilesData, error: profilesError } = await supabase
+        .from('profiles')
+        .select('user_id, full_name, email');
+
+      if (profilesError) throw profilesError;
+
+      // Create a map for quick lookup
+      const profileMap = profilesData?.reduce((acc, profile) => {
+        acc[profile.user_id] = profile;
+        return acc;
+      }, {} as Record<string, any>) || {};
+      
+      const enrichedPosts = (postsData || []).map(post => ({
+        ...post,
+        status: post.status as 'pending' | 'approved' | 'rejected',
+        user_email: profileMap[post.user_id]?.email,
+        user_name: profileMap[post.user_id]?.full_name
+      }));
+      
+      setUserPosts(enrichedPosts);
+      
+      // Calculate post analytics
+      const totalEarnings = enrichedPosts.reduce((sum, post) => sum + (post.earnings || 0), 0);
+      const pendingPosts = enrichedPosts.filter(p => p.status === 'pending').length;
+      const approvedPosts = enrichedPosts.filter(p => p.status === 'approved').length;
+      
+      setAnalytics(prev => ({
+        ...prev,
+        totalPosts: enrichedPosts.length,
+        pendingPosts,
+        approvedPosts,
+        totalEarnings
+      }));
+    } catch (error) {
+      console.error('Error fetching user posts:', error);
+    }
+  };
+
+  const updatePostStatus = async (postId: string, newStatus: 'approved' | 'rejected', earnings?: number) => {
+    try {
+      const updateData: any = { status: newStatus };
+      if (newStatus === 'approved' && earnings !== undefined) {
+        updateData.earnings = earnings;
+      }
+
+      const { error } = await supabase
+        .from('user_posts')
+        .update(updateData)
+        .eq('id', postId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Post Status Updated",
+        description: `Post ${newStatus} successfully.`,
+      });
+
+      fetchUserPosts();
     } catch (error: any) {
       toast({
         title: "Error",
@@ -493,10 +615,12 @@ const AdminDashboard = () => {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Enhanced Analytics Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-6 mb-8">
           {[
             { title: 'Total Users', value: analytics.totalUsers, icon: Users, color: 'text-blue-500', delay: 0.1 },
             { title: 'New This Week', value: analytics.newUsersThisWeek, icon: UserCheck, color: 'text-green-500', delay: 0.2 },
+            { title: 'Total Posts', value: analytics.totalPosts, icon: Activity, color: 'text-orange-500', delay: 0.25 },
+            { title: 'Pending Posts', value: analytics.pendingPosts, icon: Clock, color: 'text-yellow-500', delay: 0.27 },
             { title: 'Gallery Images', value: analytics.totalImages, icon: ImageIcon, color: 'text-purple-500', delay: 0.3 },
             { title: 'Contact Messages', value: analytics.totalMessages, icon: MessageSquare, color: 'text-orange-500', delay: 0.4 }
           ].map((item, index) => (
@@ -537,7 +661,7 @@ const AdminDashboard = () => {
           transition={{ delay: 0.5 }}
         >
           <Tabs defaultValue="analytics" className="space-y-8">
-            <TabsList className="grid w-full grid-cols-4 bg-card/50 backdrop-blur-sm border border-border/50">
+            <TabsList className="grid w-full grid-cols-5 bg-card/50 backdrop-blur-sm border border-border/50">
               <TabsTrigger value="analytics" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
                 <BarChart3 className="w-4 h-4 mr-2" />
                 Analytics
@@ -546,11 +670,15 @@ const AdminDashboard = () => {
                 <Users className="w-4 h-4 mr-2" />
                 Users
               </TabsTrigger>
+              <TabsTrigger value="posts" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+                <Activity className="w-4 h-4 mr-2" />
+                Posts
+              </TabsTrigger>
               <TabsTrigger value="gallery" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
                 <ImageIcon className="w-4 h-4 mr-2" />
                 Gallery
               </TabsTrigger>
-              <TabsTrigger value="messages" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              <TabsTrigger value="contact" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
                 <MessageSquare className="w-4 h-4 mr-2" />
                 Messages
               </TabsTrigger>
@@ -768,6 +896,378 @@ const AdminDashboard = () => {
                             Add First User
                           </Button>
                         )}
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </div>
+            </TabsContent>
+
+            {/* Post Management */}
+            <TabsContent value="posts">
+              <div className="space-y-6">
+                {/* Post Management Header */}
+                <Card className="bg-card/50 backdrop-blur-sm border-border/50">
+                  <CardHeader>
+                    <CardTitle className="flex items-center justify-between">
+                      <div className="flex items-center">
+                        <Activity className="w-5 h-5 mr-2 text-primary" />
+                        Post Management
+                      </div>
+                      <div className="flex items-center space-x-3">
+                        <Badge variant="outline">{filteredPosts.length} of {userPosts.length} Posts</Badge>
+                        <Badge variant="secondary" className="bg-yellow-100 text-yellow-800">
+                          {analytics.pendingPosts} Pending
+                        </Badge>
+                      </div>
+                    </CardTitle>
+                    <CardDescription>
+                      Review and manage user-submitted posts, approve or reject submissions
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex flex-col md:flex-row gap-4 mb-6">
+                      <div className="flex-1">
+                        <Input
+                          placeholder="Search posts by user, platform, or URL..."
+                          value={postSearchTerm}
+                          onChange={(e) => setPostSearchTerm(e.target.value)}
+                          className="bg-background/50 border-border"
+                        />
+                      </div>
+                      <Select value={postStatusFilter} onValueChange={setPostStatusFilter}>
+                        <SelectTrigger className="w-full md:w-48 bg-background/50 border-border">
+                          <SelectValue placeholder="Filter by status" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">All Status</SelectItem>
+                          <SelectItem value="pending">Pending</SelectItem>
+                          <SelectItem value="approved">Approved</SelectItem>
+                          <SelectItem value="rejected">Rejected</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Post Management Table */}
+                <Card className="bg-card/50 backdrop-blur-sm border-border/50">
+                  <CardContent className="p-0">
+                    <div className="overflow-x-auto">
+                      <Table>
+                        <TableHeader>
+                          <TableRow className="border-border/50">
+                            <TableHead className="font-semibold">User</TableHead>
+                            <TableHead className="font-semibold">Platform</TableHead>
+                            <TableHead className="font-semibold">Post URL</TableHead>
+                            <TableHead className="font-semibold">Reward Type</TableHead>
+                            <TableHead className="font-semibold">Status</TableHead>
+                            <TableHead className="font-semibold">Earnings</TableHead>
+                            <TableHead className="font-semibold">Date</TableHead>
+                            <TableHead className="font-semibold text-center">Actions</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {filteredPosts.map((post, index) => (
+                            <motion.tr
+                              key={post.id}
+                              initial={{ opacity: 0, y: 20 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              transition={{ delay: index * 0.05 }}
+                              className="border-border/50 hover:bg-muted/50"
+                            >
+                              <TableCell>
+                                <div className="flex items-center space-x-3">
+                                  <div className="w-8 h-8 bg-gradient-to-br from-primary to-secondary rounded-full flex items-center justify-center text-white font-bold text-sm">
+                                    {(post.user_name?.charAt(0) || post.user_email?.charAt(0) || 'U').toUpperCase()}
+                                  </div>
+                                  <div>
+                                    <p className="font-medium">{post.user_name || 'Unknown User'}</p>
+                                    <p className="text-sm text-muted-foreground">{post.user_email}</p>
+                                  </div>
+                                </div>
+                              </TableCell>
+                              <TableCell>
+                                <Badge variant="outline" className="capitalize">
+                                  {post.social_platform}
+                                </Badge>
+                              </TableCell>
+                              <TableCell>
+                                <a 
+                                  href={post.post_url} 
+                                  target="_blank" 
+                                  rel="noopener noreferrer"
+                                  className="text-primary hover:underline text-sm max-w-xs truncate block"
+                                >
+                                  {post.post_url}
+                                </a>
+                              </TableCell>
+                              <TableCell>
+                                <Badge variant="secondary" className="capitalize">
+                                  {post.reward_type}
+                                </Badge>
+                              </TableCell>
+                              <TableCell>
+                                <Badge 
+                                  className={
+                                    post.status === 'approved' 
+                                      ? 'bg-green-100 text-green-800 border-green-200'
+                                      : post.status === 'rejected'
+                                      ? 'bg-red-100 text-red-800 border-red-200'
+                                      : 'bg-yellow-100 text-yellow-800 border-yellow-200'
+                                  }
+                                >
+                                  {post.status === 'approved' && <CheckCircle className="w-3 h-3 mr-1" />}
+                                  {post.status === 'rejected' && <XCircle className="w-3 h-3 mr-1" />}
+                                  {post.status === 'pending' && <Clock className="w-3 h-3 mr-1" />}
+                                  {post.status.charAt(0).toUpperCase() + post.status.slice(1)}
+                                </Badge>
+                              </TableCell>
+                              <TableCell>
+                                <div className="flex items-center space-x-1">
+                                  <DollarSign className="w-4 h-4 text-green-500" />
+                                  <span className="font-medium">{post.earnings || 0}</span>
+                                </div>
+                              </TableCell>
+                              <TableCell>
+                                <span className="text-sm text-muted-foreground">
+                                  {new Date(post.created_at).toLocaleDateString()}
+                                </span>
+                              </TableCell>
+                              <TableCell>
+                                <div className="flex items-center space-x-2">
+                                  {post.status === 'pending' && (
+                                    <>
+                                      <Button
+                                        size="sm"
+                                        onClick={() => updatePostStatus(post.id, 'approved', 10)}
+                                        className="bg-green-500 hover:bg-green-600 text-white"
+                                      >
+                                        <CheckCircle className="w-3 h-3 mr-1" />
+                                        Approve
+                                      </Button>
+                                      <Button
+                                        size="sm"
+                                        variant="destructive"
+                                        onClick={() => updatePostStatus(post.id, 'rejected')}
+                                      >
+                                        <XCircle className="w-3 h-3 mr-1" />
+                                        Reject
+                                      </Button>
+                                    </>
+                                  )}
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => window.open(post.post_url, '_blank')}
+                                  >
+                                    <Eye className="w-3 h-3" />
+                                  </Button>
+                                </div>
+                              </TableCell>
+                            </motion.tr>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </div>
+
+                    {filteredPosts.length === 0 && (
+                      <div className="text-center py-12">
+                        <Activity className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                        <h3 className="text-lg font-medium text-muted-foreground mb-2">
+                          No posts found
+                        </h3>
+                        <p className="text-sm text-muted-foreground">
+                          {postSearchTerm || postStatusFilter !== 'all'
+                            ? 'Try adjusting your search or filter criteria.'
+                            : 'No posts have been submitted yet.'}
+                        </p>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </div>
+            </TabsContent>
+
+            {/* Post Management */}
+            <TabsContent value="posts">
+              <div className="space-y-6">
+                {/* Post Management Header */}
+                <Card className="bg-card/50 backdrop-blur-sm border-border/50">
+                  <CardHeader>
+                    <CardTitle className="flex items-center justify-between">
+                      <div className="flex items-center">
+                        <Activity className="w-5 h-5 mr-2 text-primary" />
+                        Post Management
+                      </div>
+                      <div className="flex items-center space-x-3">
+                        <Badge variant="outline">{filteredPosts.length} of {userPosts.length} Posts</Badge>
+                        <Badge variant="secondary" className="bg-yellow-100 text-yellow-800">
+                          {analytics.pendingPosts} Pending
+                        </Badge>
+                      </div>
+                    </CardTitle>
+                    <CardDescription>
+                      Review and manage user-submitted posts, approve or reject submissions
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex flex-col md:flex-row gap-4 mb-6">
+                      <div className="flex-1">
+                        <Input
+                          placeholder="Search posts by user, platform, or URL..."
+                          value={postSearchTerm}
+                          onChange={(e) => setPostSearchTerm(e.target.value)}
+                          className="bg-background/50 border-border"
+                        />
+                      </div>
+                      <Select value={postStatusFilter} onValueChange={setPostStatusFilter}>
+                        <SelectTrigger className="w-full md:w-48 bg-background/50 border-border">
+                          <SelectValue placeholder="Filter by status" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">All Status</SelectItem>
+                          <SelectItem value="pending">Pending</SelectItem>
+                          <SelectItem value="approved">Approved</SelectItem>
+                          <SelectItem value="rejected">Rejected</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Post Management Table */}
+                <Card className="bg-card/50 backdrop-blur-sm border-border/50">
+                  <CardContent className="p-0">
+                    <div className="overflow-x-auto">
+                      <Table>
+                        <TableHeader>
+                          <TableRow className="border-border/50">
+                            <TableHead className="font-semibold">User</TableHead>
+                            <TableHead className="font-semibold">Platform</TableHead>
+                            <TableHead className="font-semibold">Post URL</TableHead>
+                            <TableHead className="font-semibold">Reward Type</TableHead>
+                            <TableHead className="font-semibold">Status</TableHead>
+                            <TableHead className="font-semibold">Earnings</TableHead>
+                            <TableHead className="font-semibold">Date</TableHead>
+                            <TableHead className="font-semibold text-center">Actions</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {filteredPosts.map((post, index) => (
+                            <motion.tr
+                              key={post.id}
+                              initial={{ opacity: 0, y: 20 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              transition={{ delay: index * 0.05 }}
+                              className="border-border/50 hover:bg-muted/50"
+                            >
+                              <TableCell>
+                                <div className="flex items-center space-x-3">
+                                  <div className="w-8 h-8 bg-gradient-to-br from-primary to-secondary rounded-full flex items-center justify-center text-white font-bold text-sm">
+                                    {(post.user_name?.charAt(0) || post.user_email?.charAt(0) || 'U').toUpperCase()}
+                                  </div>
+                                  <div>
+                                    <p className="font-medium">{post.user_name || 'Unknown User'}</p>
+                                    <p className="text-sm text-muted-foreground">{post.user_email}</p>
+                                  </div>
+                                </div>
+                              </TableCell>
+                              <TableCell>
+                                <Badge variant="outline" className="capitalize">
+                                  {post.social_platform}
+                                </Badge>
+                              </TableCell>
+                              <TableCell>
+                                <a 
+                                  href={post.post_url} 
+                                  target="_blank" 
+                                  rel="noopener noreferrer"
+                                  className="text-primary hover:underline text-sm max-w-xs truncate block"
+                                >
+                                  {post.post_url}
+                                </a>
+                              </TableCell>
+                              <TableCell>
+                                <Badge variant="secondary" className="capitalize">
+                                  {post.reward_type}
+                                </Badge>
+                              </TableCell>
+                              <TableCell>
+                                <Badge 
+                                  className={
+                                    post.status === 'approved' 
+                                      ? 'bg-green-100 text-green-800 border-green-200'
+                                      : post.status === 'rejected'
+                                      ? 'bg-red-100 text-red-800 border-red-200'
+                                      : 'bg-yellow-100 text-yellow-800 border-yellow-200'
+                                  }
+                                >
+                                  {post.status === 'approved' && <CheckCircle className="w-3 h-3 mr-1" />}
+                                  {post.status === 'rejected' && <XCircle className="w-3 h-3 mr-1" />}
+                                  {post.status === 'pending' && <Clock className="w-3 h-3 mr-1" />}
+                                  {post.status.charAt(0).toUpperCase() + post.status.slice(1)}
+                                </Badge>
+                              </TableCell>
+                              <TableCell>
+                                <div className="flex items-center space-x-1">
+                                  <DollarSign className="w-4 h-4 text-green-500" />
+                                  <span className="font-medium">{post.earnings || 0}</span>
+                                </div>
+                              </TableCell>
+                              <TableCell>
+                                <span className="text-sm text-muted-foreground">
+                                  {new Date(post.created_at).toLocaleDateString()}
+                                </span>
+                              </TableCell>
+                              <TableCell>
+                                <div className="flex items-center space-x-2">
+                                  {post.status === 'pending' && (
+                                    <>
+                                      <Button
+                                        size="sm"
+                                        onClick={() => updatePostStatus(post.id, 'approved', 10)}
+                                        className="bg-green-500 hover:bg-green-600 text-white"
+                                      >
+                                        <CheckCircle className="w-3 h-3 mr-1" />
+                                        Approve
+                                      </Button>
+                                      <Button
+                                        size="sm"
+                                        variant="destructive"
+                                        onClick={() => updatePostStatus(post.id, 'rejected')}
+                                      >
+                                        <XCircle className="w-3 h-3 mr-1" />
+                                        Reject
+                                      </Button>
+                                    </>
+                                  )}
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => window.open(post.post_url, '_blank')}
+                                  >
+                                    <Eye className="w-3 h-3" />
+                                  </Button>
+                                </div>
+                              </TableCell>
+                            </motion.tr>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </div>
+
+                    {filteredPosts.length === 0 && (
+                      <div className="text-center py-12">
+                        <Activity className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                        <h3 className="text-lg font-medium text-muted-foreground mb-2">
+                          No posts found
+                        </h3>
+                        <p className="text-sm text-muted-foreground">
+                          {postSearchTerm || postStatusFilter !== 'all'
+                            ? 'Try adjusting your search or filter criteria.'
+                            : 'No posts have been submitted yet.'}
+                        </p>
                       </div>
                     )}
                   </CardContent>
