@@ -343,10 +343,30 @@ const AdminDashboard = () => {
   };
 
   const addGalleryImage = async () => {
-    if (!selectedImageFile || !newImageTitle || !newImageCaption) {
+    // Validate required fields
+    if (!selectedImageFile) {
       toast({
-        title: "Missing Information",
-        description: "Please provide an image file, title, and caption.",
+        title: "Missing Image",
+        description: "Please select an image file to upload.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    if (!newImageTitle || newImageTitle.trim().length < 3 || newImageTitle.trim().length > 150) {
+      toast({
+        title: "Invalid Title",
+        description: "Title must be between 3 and 150 characters.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    // Caption can be empty (null) or between 10-500 characters
+    if (newImageCaption && (newImageCaption.trim().length < 10 || newImageCaption.trim().length > 500)) {
+      toast({
+        title: "Invalid Caption",
+        description: "Caption must be between 10 and 500 characters, or left empty.",
         variant: "destructive",
       });
       return;
@@ -386,8 +406,8 @@ const AdminDashboard = () => {
         .insert({
           campaign_id: campaigns[0].id,
           image_url: publicUrl,
-          title: newImageTitle,
-          caption: newImageCaption,
+          title: newImageTitle.trim(),
+          caption: newImageCaption.trim() || null, // Set to null if empty
           is_active: true
         });
 
@@ -1214,18 +1234,29 @@ const AdminDashboard = () => {
                       />
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <Input
-                        placeholder="Image Title"
-                        value={newImageTitle}
-                        onChange={(e) => setNewImageTitle(e.target.value)}
-                        className="bg-background/50 border-border"
-                      />
-                      <Textarea
-                        placeholder="Image Caption"
-                        value={newImageCaption}
-                        onChange={(e) => setNewImageCaption(e.target.value)}
-                        className="bg-background/50 border-border"
-                      />
+                      <div className="space-y-2">
+                        <Input
+                          placeholder="Image Title (3-150 characters)"
+                          value={newImageTitle}
+                          onChange={(e) => setNewImageTitle(e.target.value)}
+                          className="bg-background/50 border-border"
+                        />
+                        <p className="text-xs text-muted-foreground">
+                          {newImageTitle.length}/150 characters
+                        </p>
+                      </div>
+                      <div className="space-y-2">
+                        <Textarea
+                          placeholder="Image Caption (10-500 characters, optional)"
+                          value={newImageCaption}
+                          onChange={(e) => setNewImageCaption(e.target.value)}
+                          className="bg-background/50 border-border"
+                          rows={3}
+                        />
+                        <p className="text-xs text-muted-foreground">
+                          {newImageCaption.length}/500 characters {newImageCaption.length > 0 && newImageCaption.length < 10 ? '(minimum 10)' : ''}
+                        </p>
+                      </div>
                     </div>
                     <Button 
                       onClick={addGalleryImage} 
