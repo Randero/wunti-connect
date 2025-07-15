@@ -258,6 +258,55 @@ const Dashboard = () => {
     }
   };
 
+  const downloadImage = async (imageUrl: string, title: string) => {
+    try {
+      const response = await fetch(imageUrl);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.jpg`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Download failed:', error);
+      toast({
+        title: "Download Failed",
+        description: "Unable to download image. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const downloadAllSelectedImages = async () => {
+    if (selectedImages.length === 0) {
+      toast({
+        title: "No Images Selected",
+        description: "Please select images first to download them.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    toast({
+      title: "Downloading Images",
+      description: `Downloading ${selectedImages.length} images...`,
+    });
+
+    for (const image of selectedImages) {
+      await downloadImage(image.image_url, image.title);
+      // Add small delay between downloads
+      await new Promise(resolve => setTimeout(resolve, 500));
+    }
+
+    toast({
+      title: "Download Complete!",
+      description: `Successfully downloaded ${selectedImages.length} images.`,
+    });
+  };
+
   const openSocialMediaPost = (platform: string, selectedImages: any[]) => {
     const campaignText = 'Supporting Engr. Aliyu Muhammed Cambat for positive change! #AliyuCambat #Vote2024';
     
@@ -275,15 +324,15 @@ const Dashboard = () => {
     switch (platform) {
       case 'facebook':
         url = 'https://www.facebook.com/';
-        instructions = 'Create a new post, upload your images, and paste the caption';
+        instructions = 'Create a new post, upload your downloaded images, and paste the caption';
         break;
       case 'instagram':
         url = 'https://www.instagram.com/';
-        instructions = 'Create a new post, upload your images, and paste the caption';
+        instructions = 'Create a new post, upload your downloaded images, and paste the caption';
         break;
       case 'twitter':
         url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(campaignText)}`;
-        instructions = 'Upload your images and complete your tweet';
+        instructions = 'Upload your downloaded images and complete your tweet';
         break;
       case 'whatsapp':
         url = `https://api.whatsapp.com/send?text=${encodeURIComponent(suggestedCaption)}`;
@@ -291,30 +340,35 @@ const Dashboard = () => {
         break;
       case 'linkedin':
         url = 'https://www.linkedin.com/sharing/share-offsite/';
-        instructions = 'Create a new post, upload your images, and paste the caption';
+        instructions = 'Create a new post, upload your downloaded images, and paste the caption';
         break;
     }
 
-    // Copy caption to clipboard
-    navigator.clipboard.writeText(suggestedCaption).then(() => {
-      toast({
-        title: "Content Ready!",
-        description: `Caption copied to clipboard. ${instructions}`,
-        duration: 5000,
+    // First download all images
+    downloadAllSelectedImages().then(() => {
+      // Copy caption to clipboard
+      navigator.clipboard.writeText(suggestedCaption).then(() => {
+        toast({
+          title: "Ready to Post!",
+          description: `Images downloaded & caption copied. ${instructions}`,
+          duration: 8000,
+        });
       });
-    });
 
-    // Open the platform
-    window.open(url, '_blank');
-    
-    // Show helpful instructions
-    setTimeout(() => {
-      toast({
-        title: "Next Steps",
-        description: "1. Upload the selected images\n2. Paste the copied caption\n3. Post your content\n4. Copy the post URL and return here",
-        duration: 10000,
-      });
-    }, 2000);
+      // Open the platform after a brief delay to allow downloads to complete
+      setTimeout(() => {
+        window.open(url, '_blank');
+        
+        // Show helpful instructions
+        setTimeout(() => {
+          toast({
+            title: "Post Now!",
+            description: "1. Check your Downloads folder for images\n2. Upload the images to your post\n3. Paste the caption\n4. Share and copy the post URL back here",
+            duration: 15000,
+          });
+        }, 2000);
+      }, 1000);
+    });
   };
 
   if (authLoading) {
