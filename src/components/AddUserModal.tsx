@@ -40,14 +40,15 @@ export const AddUserModal: React.FC<AddUserModalProps> = ({
     setLoading(true);
 
     try {
-      // Create the user via Supabase Auth
-      const { data, error: authError } = await supabase.auth.admin.createUser({
+      // Create the user via Supabase Auth using signUp and then update profile
+      const { data, error: authError } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
-        user_metadata: {
-          full_name: formData.fullName
-        },
-        email_confirm: true // Auto-confirm email for admin-created users
+        options: {
+          data: {
+            full_name: formData.fullName
+          }
+        }
       });
 
       if (authError) throw authError;

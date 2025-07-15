@@ -154,7 +154,7 @@ const Dashboard = () => {
 
   const handleRewardSelect = (type: 'airtime' | 'data') => {
     setRewardType(type);
-    setShowRewardDialog(false);
+    // Don't close the dialog immediately, keep it open so user can see the Post button
   };
 
   const handlePost = () => {
@@ -866,10 +866,13 @@ const Dashboard = () => {
               </motion.button>
             </div>
             
-            {selectedPlatform && (
+            {selectedPlatform && rewardType && (
               <div className="mt-4">
                 <Button
-                  onClick={handlePost}
+                  onClick={() => {
+                    handlePost();
+                    setShowRewardDialog(false);
+                  }}
                   className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
                 >
                   Post on {selectedPlatform.charAt(0).toUpperCase() + selectedPlatform.slice(1)}
