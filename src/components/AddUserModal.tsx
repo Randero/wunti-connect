@@ -46,7 +46,8 @@ export const AddUserModal: React.FC<AddUserModalProps> = ({
         password: formData.password,
         options: {
           data: {
-            full_name: formData.fullName
+            full_name: formData.fullName,
+            role: formData.role
           }
         }
       });
