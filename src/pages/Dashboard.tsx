@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { 
   User, 
   Image as ImageIcon, 
@@ -160,8 +160,8 @@ const Dashboard = () => {
   const handlePost = () => {
     if (!selectedPlatform || !rewardType) return;
     
-    // Open social media app
-    openSocialMediaPost(selectedPlatform, selectedImages[0]?.image_url);
+    // Open social media app with selected images
+    openSocialMediaPost(selectedPlatform, selectedImages);
     
     toast({
       title: "Redirecting...",
@@ -258,58 +258,63 @@ const Dashboard = () => {
     }
   };
 
-  const openSocialMediaPost = (platform: string, imageUrl: string) => {
+  const openSocialMediaPost = (platform: string, selectedImages: any[]) => {
     const campaignText = 'Supporting Engr. Aliyu Muhammed Cambat for positive change! #AliyuCambat #Vote2024';
     
-    // Create suggested caption
-    const suggestedCaption = `${campaignText}\n\nJoin the movement for positive change in our community! 🇳🇬\n\n#AliyuCambat #Vote2024 #Leadership #Change #Community`;
+    // Create image descriptions for the caption
+    const imageDescriptions = selectedImages.map((img, index) => 
+      `Image ${index + 1}: ${img.title}${img.caption ? ` - ${img.caption}` : ''}`
+    ).join('\n\n');
+    
+    // Create comprehensive caption with image info
+    const suggestedCaption = `${campaignText}\n\n${imageDescriptions}\n\nJoin the movement for positive change in our community! 🇳🇬\n\n#AliyuCambat #Vote2024 #Leadership #Change #Community`;
     
     let url = '';
+    let instructions = '';
+    
     switch (platform) {
       case 'facebook':
-        // Direct to Facebook's create post page
         url = 'https://www.facebook.com/';
-        // Copy caption to clipboard for Facebook
-        navigator.clipboard.writeText(suggestedCaption).then(() => {
-          toast({
-            title: "Caption Copied!",
-            description: "Suggested caption copied to clipboard. Paste it with your Facebook post.",
-          });
-        });
+        instructions = 'Create a new post, upload your images, and paste the caption';
         break;
       case 'instagram':
-        // Direct to Instagram (will open app if available, otherwise web)
         url = 'https://www.instagram.com/';
-        // Copy caption to clipboard for Instagram
-        navigator.clipboard.writeText(suggestedCaption).then(() => {
-          toast({
-            title: "Caption Copied!",
-            description: "Suggested caption copied to clipboard. Paste it with your Instagram post.",
-          });
-        });
+        instructions = 'Create a new post, upload your images, and paste the caption';
         break;
       case 'twitter':
-        // Direct to Twitter compose with pre-filled text
         url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(campaignText)}`;
+        instructions = 'Upload your images and complete your tweet';
         break;
       case 'whatsapp':
-        // Direct to WhatsApp with pre-filled text
         url = `https://api.whatsapp.com/send?text=${encodeURIComponent(suggestedCaption)}`;
+        instructions = 'Share the message with your contacts';
         break;
       case 'linkedin':
-        // Direct to LinkedIn share page
         url = 'https://www.linkedin.com/sharing/share-offsite/';
-        // Copy caption to clipboard for LinkedIn
-        navigator.clipboard.writeText(suggestedCaption).then(() => {
-          toast({
-            title: "Caption Copied!",
-            description: "Suggested caption copied to clipboard. Paste it with your LinkedIn post.",
-          });
-        });
+        instructions = 'Create a new post, upload your images, and paste the caption';
         break;
     }
 
+    // Copy caption to clipboard
+    navigator.clipboard.writeText(suggestedCaption).then(() => {
+      toast({
+        title: "Content Ready!",
+        description: `Caption copied to clipboard. ${instructions}`,
+        duration: 5000,
+      });
+    });
+
+    // Open the platform
     window.open(url, '_blank');
+    
+    // Show helpful instructions
+    setTimeout(() => {
+      toast({
+        title: "Next Steps",
+        description: "1. Upload the selected images\n2. Paste the copied caption\n3. Post your content\n4. Copy the post URL and return here",
+        duration: 10000,
+      });
+    }, 2000);
   };
 
   if (authLoading) {
@@ -787,6 +792,9 @@ const Dashboard = () => {
           <DialogContent className="sm:max-w-md">
             <DialogHeader>
               <DialogTitle className="text-center">Choose Social Media Platform</DialogTitle>
+              <DialogDescription className="text-center">
+                Select where you want to share your post
+              </DialogDescription>
             </DialogHeader>
             <div className="grid grid-cols-1 gap-4 py-4">
               {[
@@ -822,6 +830,9 @@ const Dashboard = () => {
           <DialogContent className="sm:max-w-md">
             <DialogHeader>
               <DialogTitle className="text-center">Choose Your Reward</DialogTitle>
+              <DialogDescription className="text-center">
+                Select your preferred reward type
+              </DialogDescription>
             </DialogHeader>
             <div className="grid grid-cols-1 gap-4 py-4">
               <motion.button
