@@ -59,7 +59,7 @@ const Auth = () => {
           // Don't redirect immediately, let the auth state change handle it
         }
       } else {
-        const { error } = await signUp(formData.email, formData.password, formData.fullName);
+        const { error } = await signUp(formData.email, formData.password, formData.fullName, formData.phoneNumber);
         if (error) {
           toast({
             title: "Error",
