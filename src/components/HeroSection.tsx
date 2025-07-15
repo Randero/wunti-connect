@@ -81,7 +81,7 @@ const HeroSection = () => {
               className="inline-flex items-center px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full text-white mb-6"
             >
               <Award className="w-4 h-4 mr-2" />
-              <span className="text-sm font-medium">Verified Candidate 2024</span>
+              <span className="text-sm font-medium">Verified Candidate 2025</span>
             </motion.div>
 
             <motion.h1
