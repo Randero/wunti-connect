@@ -93,29 +93,9 @@ const HeroSection = () => {
               Engr. Aliyu Muhammed
               <motion.span 
                 initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ 
-                  opacity: 1, 
-                  scale: 1,
-                  textShadow: [
-                    "0 0 20px rgba(251, 146, 60, 0.5)",
-                    "0 0 40px rgba(251, 146, 60, 0.8)",
-                    "0 0 20px rgba(251, 146, 60, 0.5)"
-                  ]
-                }}
-                transition={{ 
-                  delay: 0.8, 
-                  duration: 0.8, 
-                  type: "spring",
-                  textShadow: {
-                    duration: 2,
-                    repeat: Infinity,
-                    ease: "easeInOut"
-                  }
-                }}
-                className="block font-extrabold text-orange-400 bg-gradient-to-r from-orange-400 via-orange-500 to-amber-400 bg-clip-text text-transparent drop-shadow-lg"
-                style={{
-                  filter: "drop-shadow(0 0 10px rgba(251, 146, 60, 0.6))"
-                }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.8, duration: 0.8, type: "spring" }}
+                className="block font-extrabold text-yellow-400"
               >
                 Kombat
               </motion.span>
