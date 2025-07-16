@@ -11,7 +11,7 @@ const AboutSection = () => {
     'Professional Engineer with 15+ years experience',
     'Led infrastructure projects worth ₦50+ billion',
     'Improved community water access by 300%',
-    'Created 2,500+ direct employment opportunities',
+    'Created Alot of employment opportunities',
     'Champion of youth empowerment programs',
     'Advocate for transparent governance',
   ];
@@ -125,7 +125,7 @@ const AboutSection = () => {
             >
               <div className="relative">
                 <img
-                  src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&h=700&fit=crop"
+                  src="/images/thewhite.jpg"
                   alt="Engr. Aliyu Muhammed Kombat"
                   className="w-full h-[600px] object-cover rounded-3xl shadow-2xl"
                 />
