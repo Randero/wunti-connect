@@ -18,7 +18,7 @@ const MeetKombatSection = () => {
     },
     {
       id: 2,
-      image: "/images/leedfada2.jpg",
+      image: "/images/fadacapacity.jpg",
       title: "Community Champion",
       description: "Dedicated to serving the people with unwavering commitment. Building bridges between diverse communities and fostering unity through inclusive governance and development.",
       icon: Users,
@@ -26,7 +26,7 @@ const MeetKombatSection = () => {
     },
     {
       id: 3,
-      image: "/images/fadacapacity.png",
+      image: "/images/guy.png",
       title: "Engineering Excellence",
       description: "Technical expertise meets practical solutions. Applying engineering principles to create sustainable infrastructure that drives economic growth and improves quality of life.",
       icon: Building,
