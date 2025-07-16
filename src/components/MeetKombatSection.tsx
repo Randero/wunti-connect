@@ -26,7 +26,7 @@ const MeetKombatSection = () => {
     },
     {
       id: 3,
-      image: "/images/guy.png",
+      image: "/images/fadacapacity.png",
       title: "Engineering Excellence",
       description: "Technical expertise meets practical solutions. Applying engineering principles to create sustainable infrastructure that drives economic growth and improves quality of life.",
       icon: Building,
