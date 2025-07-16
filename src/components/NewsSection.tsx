@@ -37,12 +37,14 @@ const NewsSection = () => {
 
   // Fallback news if no news from database
   const defaultNews = [
-    {
+    //
+    
       id: '1',
       title: 'Campaign Launch Event Success',
       content: 'Our campaign officially launched with overwhelming support from the community...',
       image_url: 'https://images.unsplash.com/photo-1466442929976-97f336a657be',
       created_at: '2024-01-15T10:00:00Z'
+      // \\
     },
     {
       id: '2',
