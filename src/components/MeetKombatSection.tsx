@@ -3,11 +3,11 @@ import { motion, useInView } from 'framer-motion';
 import { useRef } from 'react';
 import { User, Target, Building, Users } from 'lucide-react';
 
-const MeetCombatSection = () => {
+const MeetKombatSection = () => {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true });
 
-  const combatProfiles = [
+  const kombatProfiles = [
     {
       id: 1,
       image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&h=800&fit=crop",
@@ -43,7 +43,7 @@ const MeetCombatSection = () => {
   ];
 
   return (
-    <section className="py-20 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 relative overflow-hidden">
+    <section id="meet-kombat" className="py-20 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 relative overflow-hidden">
       {/* Background Pattern */}
       <div className="absolute inset-0 opacity-10">
         <div className="absolute inset-0" style={{
@@ -67,7 +67,7 @@ const MeetCombatSection = () => {
             className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-500/20 to-purple-500/20 backdrop-blur-sm border border-blue-400/30 text-blue-300 rounded-full font-semibold mb-8"
           >
             <User className="w-5 h-5 mr-2" />
-            Meet Combat
+            Meet Kombat
           </motion.div>
           
           <motion.h2
@@ -77,7 +77,7 @@ const MeetCombatSection = () => {
             className="text-4xl md:text-6xl font-bold text-white mb-6"
           >
             Engr. Aliyu Muhammed
-            <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">Combat</span>
+            <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">Kombat</span>
           </motion.h2>
           
           <motion.p
@@ -92,7 +92,7 @@ const MeetCombatSection = () => {
         </motion.div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-          {combatProfiles.map((profile, index) => (
+          {kombatProfiles.map((profile, index) => (
             <motion.div
               key={profile.id}
               initial={{ opacity: 0, y: 60, rotateY: -15 }}
@@ -175,4 +175,4 @@ const MeetCombatSection = () => {
   );
 };
 
-export default MeetCombatSection;
+export default MeetKombatSection;

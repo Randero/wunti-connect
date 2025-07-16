@@ -77,7 +77,7 @@ const AboutSection = () => {
                 transition={{ delay: 0.4, duration: 0.6 }}
                 className="text-lg text-gray-600 mb-8 leading-relaxed"
               >
-                Engr. Aliyu Muhammed Combat brings decades of engineering excellence and community leadership 
+                Engr. Aliyu Muhammed Kombat brings decades of engineering excellence and community leadership 
                 to serve the people. With a proven track record of delivering results and a vision for 
                 sustainable development, he's ready to engineer a better future for all.
               </motion.p>
@@ -126,7 +126,7 @@ const AboutSection = () => {
               <div className="relative">
                 <img
                   src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&h=700&fit=crop"
-                  alt="Engr. Aliyu Muhammed Combat"
+                  alt="Engr. Aliyu Muhammed Kombat"
                   className="w-full h-[600px] object-cover rounded-3xl shadow-2xl"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-blue-900/20 to-transparent rounded-3xl" />

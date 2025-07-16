@@ -10,7 +10,7 @@ import HeroSection from '@/components/HeroSection';
 import StatsSection from '@/components/StatsSection';
 import AboutSection from '@/components/AboutSection';
 import PostEarnSection from '@/components/PostEarnSection';
-import MeetCombatSection from '@/components/MeetCombatSection';
+import MeetKombatSection from '@/components/MeetKombatSection';
 import GallerySection from '@/components/GallerySection';
 import NewsSection from '@/components/NewsSection';
 import ContactSection from '@/components/ContactSection';
@@ -48,7 +48,7 @@ const Index = () => {
       >
         <HeroSection />
         <StatsSection />
-        <MeetCombatSection />
+        <MeetKombatSection />
         <GallerySection />
         <NewsSection />
         <PostEarnSection />

@@ -111,7 +111,7 @@ const Register = () => {
                 </div>
                 <div>
                   <h1 className="text-2xl font-bold">Join the Movement</h1>
-                  <p className="text-blue-200">Engr. Combat Campaign</p>
+                  <p className="text-blue-200">Engr. Kombat Campaign</p>
                 </div>
               </motion.div>
 

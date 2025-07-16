@@ -23,7 +23,7 @@ const Navbar = () => {
   const navItems = [
     { name: 'Home', href: '#home' },
     { name: 'About', href: '#about' },
-    { name: 'Vision', href: '#vision' },
+    { name: 'Vision', href: '#meet-kombat' },
     { name: 'Contact', href: '#contact' },
   ];
 
