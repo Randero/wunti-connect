@@ -25,16 +25,7 @@ const Index = () => {
     setIsLoaded(true);
   }, []);
 
-  useEffect(() => {
-    if (!loading && user && userProfile) {
-      // Redirect based on user role
-      if (isAdmin) {
-        navigate('/admin');
-      } else {
-        navigate('/dashboard');
-      }
-    }
-  }, [user, userProfile, loading, isAdmin, navigate]);
+  // Remove automatic redirect - let users stay on home page if they want
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-gray-50">

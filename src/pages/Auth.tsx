@@ -28,13 +28,16 @@ const Auth = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    // Only redirect if both user and profile are loaded to avoid timing issues
     if (user && userProfile) {
-      // Redirect authenticated users based on role
-      if (isAdmin) {
-        navigate('/admin');
-      } else {
-        navigate('/dashboard');
-      }
+      // Small delay to ensure state is stable
+      setTimeout(() => {
+        if (isAdmin) {
+          navigate('/admin');
+        } else {
+          navigate('/dashboard');
+        }
+      }, 100);
     }
   }, [user, userProfile, isAdmin, navigate]);
 

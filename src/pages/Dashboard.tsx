@@ -58,10 +58,11 @@ const Dashboard = () => {
   });
 
   useEffect(() => {
-    if (!authLoading && !user) {
+    // Only redirect if we're sure the user is not authenticated
+    if (!authLoading && !user && !userProfile) {
       navigate('/auth');
     }
-  }, [user, authLoading, navigate]);
+  }, [user, userProfile, authLoading, navigate]);
 
   useEffect(() => {
     if (user) {
@@ -371,7 +372,7 @@ const Dashboard = () => {
     });
   };
 
-  if (authLoading) {
+  if (authLoading || (!user && !userProfile)) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-gray-50 flex items-center justify-center">
         <div className="text-center">
@@ -382,7 +383,7 @@ const Dashboard = () => {
     );
   }
 
-  if (!user) {
+  if (!user || !userProfile) {
     return null;
   }
 
