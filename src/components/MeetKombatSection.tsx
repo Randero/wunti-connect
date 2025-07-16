@@ -10,7 +10,7 @@ const MeetKombatSection = () => {
   const kombatProfiles = [
     {
       id: 1,
-      image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&h=800&fit=crop",
+      image: "/images/redcapacity.jpg",
       title: "Visionary Leader",
       description: "Leading with integrity and a clear vision for progress. Engineering minds and building solutions that transform communities through innovative infrastructure development.",
       icon: Target,
@@ -18,7 +18,7 @@ const MeetKombatSection = () => {
     },
     {
       id: 2,
-      image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=600&h=800&fit=crop",
+      image: "/images/leedfada2.jpg",
       title: "Community Champion",
       description: "Dedicated to serving the people with unwavering commitment. Building bridges between diverse communities and fostering unity through inclusive governance and development.",
       icon: Users,
@@ -26,7 +26,7 @@ const MeetKombatSection = () => {
     },
     {
       id: 3,
-      image: "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=600&h=800&fit=crop",
+      image: "/images/guy.png",
       title: "Engineering Excellence",
       description: "Technical expertise meets practical solutions. Applying engineering principles to create sustainable infrastructure that drives economic growth and improves quality of life.",
       icon: Building,
@@ -34,7 +34,7 @@ const MeetKombatSection = () => {
     },
     {
       id: 4,
-      image: "https://images.unsplash.com/photo-1566492031773-4f4e44671d66?w=600&h=800&fit=crop",
+      image: "/images/connection.png",
       title: "Progressive Innovator",
       description: "Pioneering new approaches to governance and development. Leveraging technology and modern methodologies to create efficient, transparent, and citizen-centered public services.",
       icon: User,
