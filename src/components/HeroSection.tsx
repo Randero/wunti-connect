@@ -13,19 +13,19 @@ const HeroSection = () => {
   const candidatePhotos = [
     {
       id: 1,
-      src: "KC/fada.png",
+      src: "/images/fada.png",
       title: "Leadership Vision",
       description: "Building tomorrow's infrastructure today"
     },
     {
       id: 2,
-      src: "KC/theblue.png",
+      src: "/images/theblue.png",
       title: "Community Focus",
       description: "Serving the people with dedication and integrity"
     },
     {
       id: 3,
-      src: "KC/guy.png",
+      src: "/images/guy.png",
       title: "Engineering Excellence",
       description: "Technical expertise for practical solutions"
     }
