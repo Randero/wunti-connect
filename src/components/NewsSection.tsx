@@ -37,27 +37,27 @@ const NewsSection = () => {
 
   // Fallback news if no news from database
   const defaultNews = [
-    //
     
+    {
       id: '1',
-      title: 'Campaign Launch Event Success',
-      content: 'Our campaign officially launched with overwhelming support from the community...',
-      image_url: 'https://images.unsplash.com/photo-1466442929976-97f336a657be',
+      title: 'KSFD',
+      content: 'Support for people with disabilites ...',
+      image_url: '/images/kcharity3.png',
       created_at: '2024-01-15T10:00:00Z'
-      // \\
+  
     },
     {
       id: '2',
       title: 'Youth Engagement Initiative',
-      content: 'Announcing new programs to engage young voters and address their concerns...',
-      image_url: 'https://images.unsplash.com/photo-1500673922987-e212871fec22',
+      content: 'Announcing new programs to engage youth and address their concerns...',
+      image_url: '/images/kcharity4.jpg',
       created_at: '2024-01-12T14:30:00Z'
     },
     {
       id: '3',
       title: 'Community Development Plans',
       content: 'Detailed roadmap for infrastructure and economic development in our region...',
-      image_url: 'https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d',
+      image_url: '/images/kcharity2.jpg',
       created_at: '2024-01-10T09:15:00Z'
     }
   ];
