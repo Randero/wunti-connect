@@ -95,7 +95,7 @@ const HeroSection = () => {
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 0.8, duration: 0.8, type: "spring" }}
-                className="block font-extrabold text-blue-900"
+                className="block font-extrabold text-yellow-400"
               >
                 Kombat
               </motion.span>
