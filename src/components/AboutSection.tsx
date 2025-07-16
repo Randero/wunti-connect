@@ -10,7 +10,7 @@ const AboutSection = () => {
   const achievements = [
     'Professional Engineer with 15+ years experience',
     'Led infrastructure projects worth ₦50+ billion',
-    'Improved community water access by 300%',
+    'Improved a lot of communites by 300%',
     'Created Alot of employment opportunities',
     'Champion of youth empowerment programs',
     'Advocate for transparent governance',
