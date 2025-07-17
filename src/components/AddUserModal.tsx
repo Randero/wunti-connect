@@ -12,6 +12,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
+import { successToast, errorToast } from '@/components/ui/enhanced-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { Mail, User, Shield, Lock } from 'lucide-react';
 
@@ -64,10 +65,10 @@ export const AddUserModal: React.FC<AddUserModalProps> = ({
         if (profileError) throw profileError;
       }
 
-      toast({
-        title: "Success",
-        description: `User ${formData.fullName} has been created successfully with ${formData.role} role.`,
-      });
+      successToast(
+        "User Created Successfully!",
+        `${formData.fullName} has been created with ${formData.role} role and can now access the system.`
+      );
 
       // Reset form and close modal
       setFormData({
@@ -80,11 +81,10 @@ export const AddUserModal: React.FC<AddUserModalProps> = ({
       onClose();
     } catch (error: any) {
       console.error('Error creating user:', error);
-      toast({
-        title: "Error",
-        description: error.message || "Failed to create user. Please try again.",
-        variant: "destructive",
-      });
+      errorToast(
+        "Failed to Create User",
+        error.message || "There was an issue creating the user account. Please check the details and try again."
+      );
     } finally {
       setLoading(false);
     }

@@ -15,6 +15,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { UserDetailsModal } from '@/components/UserDetailsModal';
 import { AddUserModal } from '@/components/AddUserModal';
+import { UserPasswordModal } from '@/components/UserPasswordModal';
+import { successToast, errorToast } from '@/components/ui/enhanced-toast';
 import { 
   Shield, 
   Users, 
@@ -43,7 +45,8 @@ import {
   Trash2,
   UserX,
   Crown,
-  Sparkles
+  Sparkles,
+  Key
 } from 'lucide-react';
 
 interface User {
@@ -119,6 +122,7 @@ const AdminDashboard = () => {
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [showUserDetails, setShowUserDetails] = useState(false);
   const [showAddUser, setShowAddUser] = useState(false);
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
   
   // New image form state
   const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
@@ -502,10 +506,10 @@ const AdminDashboard = () => {
 
       if (error) throw error;
 
-      toast({
-        title: "Post Status Updated",
-        description: `Post ${newStatus} successfully.`,
-      });
+      successToast(
+        "Post Status Updated",
+        `Post ${newStatus} successfully and user notified.`
+      );
 
       fetchUserPosts();
     } catch (error: any) {
@@ -526,10 +530,10 @@ const AdminDashboard = () => {
 
       if (error) throw error;
 
-      toast({
-        title: "Role Updated",
-        description: `User role updated to ${newRole}.`,
-      });
+      successToast(
+        "Role Updated Successfully",
+        `${users.find(u => u.user_id === userId)?.full_name || 'User'}'s role has been updated to ${newRole}.`
+      );
 
       // Update the users list immediately
       setUsers(prevUsers => 
@@ -1041,13 +1045,26 @@ const AdminDashboard = () => {
                               </TableCell>
                                <TableCell>
                                  <div className="flex items-center justify-center space-x-2">
-                                   <Button
-                                     size="sm"
-                                     variant="outline"
-                                     onClick={() => handleViewUser(user)}
-                                   >
-                                     <Eye className="w-3 h-3" />
-                                   </Button>
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      onClick={() => handleViewUser(user)}
+                                      title="View Details"
+                                    >
+                                      <Eye className="w-3 h-3" />
+                                    </Button>
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      onClick={() => {
+                                        setSelectedUser(user);
+                                        setShowPasswordModal(true);
+                                      }}
+                                      className="text-blue-600 hover:text-blue-700"
+                                      title="Reset Password"
+                                    >
+                                      <Key className="w-3 h-3" />
+                                    </Button>
                                    {user.account_status === 'suspended' ? (
                                      <Button
                                        size="sm"
@@ -1656,6 +1673,12 @@ const AdminDashboard = () => {
         isOpen={showAddUser}
         onClose={() => setShowAddUser(false)}
         onUserAdded={fetchUsers}
+      />
+
+      <UserPasswordModal
+        isOpen={showPasswordModal}
+        onClose={() => setShowPasswordModal(false)}
+        user={selectedUser}
       />
     </div>
   );
