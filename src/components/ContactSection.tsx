@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { useToast } from '@/hooks/use-toast';
+import { successToast, errorToast } from '@/components/ui/enhanced-toast';
 import { supabase } from '@/integrations/supabase/client';
 
 const ContactSection = () => {
@@ -20,7 +20,7 @@ const ContactSection = () => {
     phone: '',
     message: ''
   });
-  const { toast } = useToast();
+  
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData({
@@ -83,11 +83,10 @@ const ContactSection = () => {
       // Client-side validation
       const validationErrors = validateInput();
       if (validationErrors.length > 0) {
-        toast({
-          title: "Validation Error",
-          description: validationErrors[0],
-          variant: "destructive",
-        });
+        errorToast(
+          "⚠️ Validation Error",
+          validationErrors[0]
+        );
         setLoading(false);
         return;
       }
@@ -112,21 +111,20 @@ const ContactSection = () => {
       if (error) {
         // Check if it's a rate limiting error
         if (error.message.includes('rate limit') || error.message.includes('too many')) {
-          toast({
-            title: "Rate Limit Exceeded",
-            description: "You've submitted too many messages recently. Please wait before trying again.",
-            variant: "destructive",
-          });
+          errorToast(
+            "⚠️ Rate Limit Exceeded",
+            "You've submitted too many messages recently. Please wait before trying again."
+          );
           setLoading(false);
           return;
         }
         throw error;
       }
 
-      toast({
-        title: "Message Sent!",
-        description: "Thank you for reaching out. We'll get back to you soon.",
-      });
+      successToast(
+        "🎉 Message Sent!",
+        "Thank you for reaching out. We'll get back to you soon."
+      );
 
       // Reset form
       setFormData({
@@ -153,11 +151,10 @@ const ContactSection = () => {
         }
       }
       
-      toast({
-        title: "Error",
-        description: errorMessage,
-        variant: "destructive",
-      });
+      errorToast(
+        "❌ Error Sending Message",
+        errorMessage
+      );
     } finally {
       setLoading(false);
     }

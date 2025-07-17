@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Eye, EyeOff, Mail, Lock, User, ArrowLeft, Phone } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
-import { useToast } from '@/hooks/use-toast';
+import { successToast, errorToast } from '@/components/ui/enhanced-toast';
 import { ForgotPasswordModal } from '@/components/ForgotPasswordModal';
 
 const Auth = () => {
@@ -24,7 +24,7 @@ const Auth = () => {
   });
 
   const { signIn, signUp, user, userProfile, isAdmin } = useAuth();
-  const { toast } = useToast();
+  
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -49,39 +49,36 @@ const Auth = () => {
       if (isLogin) {
         const { error } = await signIn(formData.email, formData.password);
         if (error) {
-          toast({
-            title: "Error",
-            description: error.message,
-            variant: "destructive",
-          });
+          errorToast(
+            "❌ Login Failed",
+            error.message
+          );
         } else {
-          toast({
-            title: "Success",
-            description: "Welcome back!",
-          });
+          successToast(
+            "🎉 Welcome Back!",
+            "Successfully logged in to your account."
+          );
           // Don't redirect immediately, let the auth state change handle it
         }
       } else {
         const { error } = await signUp(formData.email, formData.password, formData.fullName, formData.phoneNumber);
         if (error) {
-          toast({
-            title: "Error",
-            description: error.message,
-            variant: "destructive",
-          });
+          errorToast(
+            "❌ Sign Up Failed",
+            error.message
+          );
         } else {
-          toast({
-            title: "Success",
-            description: "Account created! Please check your email to verify your account.",
-          });
+          successToast(
+            "🎉 Account Created!",
+            "Account created! Please check your email to verify your account."
+          );
         }
       }
     } catch (error: any) {
-      toast({
-        title: "Error",
-        description: "Something went wrong. Please try again.",
-        variant: "destructive",
-      });
+      errorToast(
+        "❌ Authentication Failed",
+        "Something went wrong. Please try again."
+      );
     } finally {
       setLoading(false);
     }

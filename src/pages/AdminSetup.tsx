@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { useToast } from '@/hooks/use-toast';
+import { successToast, errorToast } from '@/components/ui/enhanced-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { Crown, ArrowLeft, Shield, Lock } from 'lucide-react';
 
@@ -16,7 +16,7 @@ const AdminSetup = () => {
     password: '',
     fullName: '',
   });
-  const { toast } = useToast();
+  
   const navigate = useNavigate();
 
   const handleCreateAdmin = async (e: React.FormEvent) => {
@@ -50,25 +50,24 @@ const AdminSetup = () => {
           // Continue anyway, we can fix the role later
         }
 
-        toast({
-          title: "✨ Admin Account Created!",
-          description: "Admin account created successfully. Please check your email to verify your account, then you can login.",
-        });
+        successToast(
+          "✨ Admin Account Created!",
+          "Admin account created successfully. Please check your email to verify your account, then you can login."
+        );
 
         // Show the credentials for easy reference
         setTimeout(() => {
-          toast({
-            title: "📝 Your Admin Credentials",
-            description: `Email: ${formData.email} - Save these credentials!`,
-          });
+          successToast(
+            "📝 Your Admin Credentials",
+            `Email: ${formData.email} - Save these credentials!`
+          );
         }, 2000);
       }
     } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
+      errorToast(
+        "❌ Setup Failed",
+        error.message
+      );
     } finally {
       setLoading(false);
     }
@@ -87,16 +86,15 @@ const AdminSetup = () => {
 
       if (error) throw error;
 
-      toast({
-        title: "Password Reset Sent",
-        description: "Check your email for password reset instructions.",
-      });
+      successToast(
+        "📧 Password Reset Sent!",
+        "Check your email for password reset instructions."
+      );
     } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
+      errorToast(
+        "❌ Reset Failed",
+        error.message
+      );
     } finally {
       setLoading(false);
     }

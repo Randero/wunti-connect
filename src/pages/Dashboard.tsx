@@ -35,12 +35,12 @@ import {
   Plus
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
-import { useToast } from '@/hooks/use-toast';
+import { successToast, errorToast } from '@/components/ui/enhanced-toast';
 import { supabase } from '@/integrations/supabase/client';
 
 const Dashboard = () => {
   const { user, userProfile, signOut, loading: authLoading } = useAuth();
-  const { toast } = useToast();
+  
   const navigate = useNavigate();
   const [galleryImages, setGalleryImages] = useState<any[]>([]);
   const [selectedImages, setSelectedImages] = useState<any[]>([]);
@@ -139,11 +139,10 @@ const Dashboard = () => {
     if (selectedImages.length === 2) {
       setShowPlatformDialog(true);
     } else {
-      toast({
-        title: "Select Images",
-        description: "Please select exactly 2 images from the gallery.",
-        variant: "destructive",
-      });
+      errorToast(
+        "⚠️ Select Images Required",
+        "Please select exactly 2 images from the gallery."
+      );
     }
   };
 
@@ -164,19 +163,18 @@ const Dashboard = () => {
     // Open social media app with selected images
     openSocialMediaPost(selectedPlatform, selectedImages);
     
-    toast({
-      title: "Redirecting...",
-      description: `Opening ${selectedPlatform.charAt(0).toUpperCase() + selectedPlatform.slice(1)} to post your content.`,
-    });
+    successToast(
+      "🔄 Redirecting...",
+      `Opening ${selectedPlatform.charAt(0).toUpperCase() + selectedPlatform.slice(1)} to post your content.`
+    );
   };
 
   const handleSubmitPost = async () => {
     if (!postUrl || !selectedPlatform || !rewardType || selectedImages.length !== 2) {
-      toast({
-        title: "Missing Information",
-        description: "Please fill all required fields and select 2 images.",
-        variant: "destructive",
-      });
+      errorToast(
+        "⚠️ Missing Information",
+        "Please fill all required fields and select 2 images."
+      );
       return;
     }
 
@@ -195,18 +193,17 @@ const Dashboard = () => {
 
       if (error) {
         console.error('Error submitting post:', error);
-        toast({
-          title: "Submission Failed",
-          description: "There was an error submitting your post. Please try again.",
-          variant: "destructive",
-        });
+        errorToast(
+          "❌ Submission Failed",
+          "There was an error submitting your post. Please try again."
+        );
         return;
       }
 
-      toast({
-        title: "Post Submitted Successfully!",
-        description: "Your post is now under review by our moderators. Check your post history for updates.",
-      });
+      successToast(
+        "🎉 Post Submitted Successfully!",
+        "Your post is now under review by our moderators. Check your post history for updates."
+      );
 
       // Reset form
       setSelectedImages([]);
@@ -219,11 +216,10 @@ const Dashboard = () => {
       
     } catch (error) {
       console.error('Error submitting post:', error);
-      toast({
-        title: "Submission Failed",
-        description: "There was an error submitting your post. Please try again.",
-        variant: "destructive",
-      });
+      errorToast(
+        "❌ Submission Failed",
+        "There was an error submitting your post. Please try again."
+      );
     } finally {
       setLoading(false);
     }
@@ -273,28 +269,26 @@ const Dashboard = () => {
       window.URL.revokeObjectURL(url);
     } catch (error) {
       console.error('Download failed:', error);
-      toast({
-        title: "Download Failed",
-        description: "Unable to download image. Please try again.",
-        variant: "destructive",
-      });
+      errorToast(
+        "❌ Download Failed",
+        "Unable to download image. Please try again."
+      );
     }
   };
 
   const downloadAllSelectedImages = async () => {
     if (selectedImages.length === 0) {
-      toast({
-        title: "No Images Selected",
-        description: "Please select images first to download them.",
-        variant: "destructive",
-      });
+      errorToast(
+        "⚠️ No Images Selected",
+        "Please select images first to download them."
+      );
       return;
     }
 
-    toast({
-      title: "Downloading Images",
-      description: `Downloading ${selectedImages.length} images...`,
-    });
+    successToast(
+      "📥 Downloading Images",
+      `Downloading ${selectedImages.length} images...`
+    );
 
     for (const image of selectedImages) {
       await downloadImage(image.image_url, image.title);
@@ -302,10 +296,10 @@ const Dashboard = () => {
       await new Promise(resolve => setTimeout(resolve, 500));
     }
 
-    toast({
-      title: "Download Complete!",
-      description: `Successfully downloaded ${selectedImages.length} images.`,
-    });
+    successToast(
+      "✅ Download Complete!",
+      `Successfully downloaded ${selectedImages.length} images.`
+    );
   };
 
   const openSocialMediaPost = (platform: string, selectedImages: any[]) => {
@@ -349,11 +343,10 @@ const Dashboard = () => {
     downloadAllSelectedImages().then(() => {
       // Copy caption to clipboard
       navigator.clipboard.writeText(suggestedCaption).then(() => {
-        toast({
-          title: "Ready to Post!",
-          description: `Images downloaded & caption copied. ${instructions}`,
-          duration: 8000,
-        });
+        successToast(
+          "🚀 Ready to Post!",
+          `Images downloaded & caption copied. ${instructions}`
+        );
       });
 
       // Open the platform after a brief delay to allow downloads to complete
@@ -362,11 +355,10 @@ const Dashboard = () => {
         
         // Show helpful instructions
         setTimeout(() => {
-          toast({
-            title: "Post Now!",
-            description: "1. Check your Downloads folder for images\n2. Upload the images to your post\n3. Paste the caption\n4. Share and copy the post URL back here",
-            duration: 15000,
-          });
+          successToast(
+            "📱 Post Now!",
+            "1. Check your Downloads folder for images\n2. Upload the images to your post\n3. Paste the caption\n4. Share and copy the post URL back here"
+          );
         }, 2000);
       }, 1000);
     });

@@ -10,7 +10,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useToast } from '@/hooks/use-toast';
+import { successToast, errorToast } from '@/components/ui/enhanced-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { Mail, ArrowLeft, CheckCircle } from 'lucide-react';
 
@@ -26,7 +26,7 @@ export const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
-  const { toast } = useToast();
+  
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -41,11 +41,10 @@ export const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({
         .single();
 
       if (!profileData) {
-        toast({
-          title: "User Not Found",
-          description: "No account found with this email address.",
-          variant: "destructive",
-        });
+        errorToast(
+          "❌ User Not Found",
+          "No account found with this email address."
+        );
         setLoading(false);
         return;
       }
@@ -58,17 +57,16 @@ export const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({
       if (error) throw error;
 
       setEmailSent(true);
-      toast({
-        title: "Reset Link Sent",
-        description: "Check your email for password reset instructions.",
-      });
+      successToast(
+        "📧 Reset Link Sent!",
+        "Check your email for password reset instructions."
+      );
     } catch (error: any) {
       console.error('Error sending reset email:', error);
-      toast({
-        title: "Error",
-        description: error.message || "Failed to send reset email. Please try again.",
-        variant: "destructive",
-      });
+      errorToast(
+        "❌ Reset Failed",
+        error.message || "Failed to send reset email. Please try again."
+      );
     } finally {
       setLoading(false);
     }

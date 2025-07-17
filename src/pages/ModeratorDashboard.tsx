@@ -10,7 +10,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useToast } from '@/hooks/use-toast';
+import { successToast, errorToast } from '@/components/ui/enhanced-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { 
@@ -72,7 +72,7 @@ interface GalleryImage {
 
 const ModeratorDashboard = () => {
   const { user, userProfile, signOut, loading: authLoading, isManager } = useAuth();
-  const { toast } = useToast();
+  
   const navigate = useNavigate();
   
   // State management
@@ -114,11 +114,10 @@ const ModeratorDashboard = () => {
       ]);
     } catch (error) {
       console.error('Error fetching moderator data:', error);
-      toast({
-        title: "Error",
-        description: "Failed to load dashboard data",
-        variant: "destructive",
-      });
+      errorToast(
+        "❌ Dashboard Error",
+        "Failed to load dashboard data"
+      );
     } finally {
       setLoading(false);
     }
@@ -190,11 +189,10 @@ const ModeratorDashboard = () => {
 
   const addGalleryImage = async () => {
     if (!selectedFile || !newImageTitle.trim()) {
-      toast({
-        title: "Error",
-        description: "Please select a file and enter a title",
-        variant: "destructive",
-      });
+      errorToast(
+        "⚠️ Missing Information",
+        "Please select a file and enter a title"
+      );
       return;
     }
 
@@ -227,10 +225,10 @@ const ModeratorDashboard = () => {
 
       if (insertError) throw insertError;
 
-      toast({
-        title: "Success",
-        description: "Image added to gallery successfully",
-      });
+      successToast(
+        "🎉 Image Added Successfully!",
+        "Image added to gallery successfully"
+      );
 
       setNewImageTitle('');
       setNewImageCaption('');
@@ -238,11 +236,10 @@ const ModeratorDashboard = () => {
       fetchGalleryImages();
     } catch (error) {
       console.error('Error adding gallery image:', error);
-      toast({
-        title: "Error",
-        description: "Failed to add image to gallery",
-        variant: "destructive",
-      });
+      errorToast(
+        "❌ Upload Failed",
+        "Failed to add image to gallery"
+      );
     } finally {
       setUploadingImage(false);
     }
@@ -256,18 +253,17 @@ const ModeratorDashboard = () => {
 
     if (error) {
       console.error('Error updating image status:', error);
-      toast({
-        title: "Error",
-        description: "Failed to update image status",
-        variant: "destructive",
-      });
+      errorToast(
+        "❌ Update Failed",
+        "Failed to update image status"
+      );
       return;
     }
 
-    toast({
-      title: "Success",
-      description: `Image ${!currentStatus ? 'activated' : 'deactivated'} successfully`,
-    });
+    successToast(
+      "✅ Status Updated!",
+      `Image ${!currentStatus ? 'activated' : 'deactivated'} successfully`
+    );
 
     fetchGalleryImages();
   };
@@ -287,18 +283,17 @@ const ModeratorDashboard = () => {
 
     if (error) {
       console.error('Error updating post status:', error);
-      toast({
-        title: "Error",
-        description: "Failed to update post status",
-        variant: "destructive",
-      });
+      errorToast(
+        "❌ Update Failed",
+        "Failed to update post status"
+      );
       return;
     }
 
-    toast({
-      title: "Success",
-      description: `Post ${newStatus} successfully${newStatus === 'approved' ? ` - ₦${earnings || 500} earnings awarded` : ''}`,
-    });
+    successToast(
+      "🎉 Post Status Updated!",
+      `Post ${newStatus} successfully${newStatus === 'approved' ? ` - ₦${earnings || 500} earnings awarded` : ''}`
+    );
 
     fetchUserPosts();
   };
@@ -311,18 +306,17 @@ const ModeratorDashboard = () => {
 
     if (error) {
       console.error('Error updating submission status:', error);
-      toast({
-        title: "Error",
-        description: "Failed to update submission status",
-        variant: "destructive",
-      });
+      errorToast(
+        "❌ Update Failed",
+        "Failed to update submission status"
+      );
       return;
     }
 
-    toast({
-      title: "Success",
-      description: "Submission status updated successfully",
-    });
+    successToast(
+      "✅ Submission Updated!",
+      "Submission status updated successfully"
+    );
 
     fetchContactSubmissions();
   };
