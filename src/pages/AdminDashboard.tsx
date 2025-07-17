@@ -15,6 +15,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { UserDetailsModal } from '@/components/UserDetailsModal';
 import { AddUserModal } from '@/components/AddUserModal';
+import { EditUserModal } from '@/components/EditUserModal';
 import { UserPasswordModal } from '@/components/UserPasswordModal';
 import { successToast, errorToast } from '@/components/ui/enhanced-toast';
 import { 
@@ -122,6 +123,7 @@ const AdminDashboard = () => {
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [showUserDetails, setShowUserDetails] = useState(false);
   const [showAddUser, setShowAddUser] = useState(false);
+  const [showEditUser, setShowEditUser] = useState(false);
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   
   // New image form state
@@ -1053,18 +1055,30 @@ const AdminDashboard = () => {
                                     >
                                       <Eye className="w-3 h-3" />
                                     </Button>
-                                    <Button
-                                      size="sm"
-                                      variant="outline"
-                                      onClick={() => {
-                                        setSelectedUser(user);
-                                        setShowPasswordModal(true);
-                                      }}
-                                      className="text-blue-600 hover:text-blue-700"
-                                      title="Reset Password"
-                                    >
-                                      <Key className="w-3 h-3" />
-                                    </Button>
+                                     <Button
+                                       size="sm"
+                                       variant="outline"
+                                       onClick={() => {
+                                         setSelectedUser(user);
+                                         setShowEditUser(true);
+                                       }}
+                                       className="text-green-600 hover:text-green-700"
+                                       title="Edit Profile"
+                                     >
+                                       <Edit className="w-3 h-3" />
+                                     </Button>
+                                     <Button
+                                       size="sm"
+                                       variant="outline"
+                                       onClick={() => {
+                                         setSelectedUser(user);
+                                         setShowPasswordModal(true);
+                                       }}
+                                       className="text-blue-600 hover:text-blue-700"
+                                       title="Reset Password"
+                                     >
+                                       <Key className="w-3 h-3" />
+                                     </Button>
                                    {user.account_status === 'suspended' ? (
                                      <Button
                                        size="sm"
@@ -1673,6 +1687,13 @@ const AdminDashboard = () => {
         isOpen={showAddUser}
         onClose={() => setShowAddUser(false)}
         onUserAdded={fetchUsers}
+      />
+
+      <EditUserModal
+        user={selectedUser}
+        isOpen={showEditUser}
+        onClose={() => setShowEditUser(false)}
+        onUserUpdated={fetchUsers}
       />
 
       <UserPasswordModal

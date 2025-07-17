@@ -42,7 +42,7 @@ serve(async (req) => {
       })
     }
 
-    const { email, password, fullName, role } = await req.json()
+    const { email, password, fullName, phoneNumber, role } = await req.json()
 
     // Create user using service role
     const { data: newUser, error: authError } = await supabaseClient.auth.admin.createUser({
@@ -70,6 +70,7 @@ serve(async (req) => {
           user_id: newUser.user.id,
           full_name: fullName,
           email,
+          phone_number: phoneNumber,
           role
         })
     }

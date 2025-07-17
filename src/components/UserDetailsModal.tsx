@@ -172,6 +172,10 @@ export const UserDetailsModal: React.FC<UserDetailsModalProps> = ({
                     <span className="font-medium">{user.email}</span>
                   </div>
                   <div className="flex justify-between items-center p-3 bg-muted rounded-lg">
+                    <span className="text-muted-foreground">Phone Number</span>
+                    <span className="font-medium">{user.phone_number || 'Not provided'}</span>
+                  </div>
+                  <div className="flex justify-between items-center p-3 bg-muted rounded-lg">
                     <span className="text-muted-foreground">User ID</span>
                     <span className="font-mono text-sm">{user.user_id}</span>
                   </div>

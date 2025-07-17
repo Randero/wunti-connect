@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
 import {
   Dialog,
   DialogContent,
@@ -11,86 +10,74 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useToast } from '@/hooks/use-toast';
 import { successToast, errorToast } from '@/components/ui/enhanced-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { Mail, User, Shield, Lock } from 'lucide-react';
+import { Mail, User, Shield, Phone } from 'lucide-react';
 
-interface AddUserModalProps {
+interface EditUserModalProps {
+  user: any;
   isOpen: boolean;
   onClose: () => void;
-  onUserAdded: () => void;
+  onUserUpdated: () => void;
 }
 
-export const AddUserModal: React.FC<AddUserModalProps> = ({
+export const EditUserModal: React.FC<EditUserModalProps> = ({
+  user,
   isOpen,
   onClose,
-  onUserAdded
+  onUserUpdated
 }) => {
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
-    email: '',
-    fullName: '',
-    phoneNumber: '',
-    role: 'user',
-    password: ''
+    email: user?.email || '',
+    fullName: user?.full_name || '',
+    phoneNumber: user?.phone_number || '',
+    role: user?.role || 'user'
   });
-  const { toast } = useToast();
+
+  React.useEffect(() => {
+    if (user) {
+      setFormData({
+        email: user.email || '',
+        fullName: user.full_name || '',
+        phoneNumber: user.phone_number || '',
+        role: user.role || 'user'
+      });
+    }
+  }, [user]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        throw new Error('Not authenticated');
-      }
-
-      // Call Edge Function to create user
-      const response = await fetch(`https://bwcqbglfyvuvpbvaehcn.supabase.co/functions/v1/admin-create-user`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session.access_token}`
-        },
-        body: JSON.stringify({
+      // Update profile information
+      const { error } = await supabase
+        .from('profiles')
+        .update({
+          full_name: formData.fullName,
           email: formData.email,
-          password: formData.password,
-          fullName: formData.fullName,
-          phoneNumber: formData.phoneNumber,
+          phone_number: formData.phoneNumber,
           role: formData.role
         })
-      });
+        .eq('user_id', user.user_id);
 
-      const result = await response.json();
-      
-      if (!response.ok) {
-        throw new Error(result.error || 'Failed to create user');
+      if (error) {
+        throw error;
       }
 
       successToast(
-        "🎉 User Created Successfully!",
-        `${formData.fullName} has been created with ${formData.role} role. They can now login immediately.`
+        "Profile Updated Successfully!",
+        `${formData.fullName}'s profile information has been updated.`
       );
 
-      // Reset form and close modal
-      setFormData({
-        email: '',
-        fullName: '',
-        phoneNumber: '',
-        role: 'user',
-        password: ''
-      });
-      onUserAdded();
+      onUserUpdated();
       onClose();
     } catch (error: any) {
-      console.error('Error creating user:', error);
+      console.error('Error updating user:', error);
       errorToast(
-        "❌ User Creation Failed",
-        error.message === 'User already registered' 
-          ? "A user with this email already exists. Please use a different email address."
-          : error.message || "Unable to create user account. Please verify your admin permissions and try again."
+        "Profile Update Failed",
+        error.message || "Unable to update user profile. Please try again."
       );
     } finally {
       setLoading(false);
@@ -104,14 +91,7 @@ export const AddUserModal: React.FC<AddUserModalProps> = ({
     }));
   };
 
-  const generatePassword = () => {
-    const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*";
-    let password = "";
-    for (let i = 0; i < 12; i++) {
-      password += charset.charAt(Math.floor(Math.random() * charset.length));
-    }
-    setFormData(prev => ({ ...prev, password }));
-  };
+  if (!user) return null;
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -121,10 +101,10 @@ export const AddUserModal: React.FC<AddUserModalProps> = ({
             <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
               <User className="w-4 h-4 text-primary-foreground" />
             </div>
-            <span>Add New User</span>
+            <span>Edit User Profile</span>
           </DialogTitle>
           <DialogDescription>
-            Create a new user account with specified role and permissions
+            Edit user profile information and settings
           </DialogDescription>
         </DialogHeader>
 
@@ -163,7 +143,7 @@ export const AddUserModal: React.FC<AddUserModalProps> = ({
           <div className="space-y-2">
             <Label htmlFor="phoneNumber">Phone Number</Label>
             <div className="relative">
-              <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+              <Phone className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
               <Input
                 id="phoneNumber"
                 placeholder="Enter phone number"
@@ -195,36 +175,6 @@ export const AddUserModal: React.FC<AddUserModalProps> = ({
             </div>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
-            <div className="relative">
-              <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-              <Input
-                id="password"
-                type="password"
-                placeholder="Enter password"
-                value={formData.password}
-                onChange={(e) => handleInputChange('password', e.target.value)}
-                className="pl-10 pr-24"
-                required
-              />
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={generatePassword}
-                className="absolute right-1 top-1 h-8 px-2 text-xs"
-              >
-                Generate
-              </Button>
-            </div>
-            {formData.password && (
-              <p className="text-xs text-muted-foreground">
-                Password strength: {formData.password.length >= 8 ? 'Strong' : 'Weak'}
-              </p>
-            )}
-          </div>
-
           <div className="flex space-x-3 pt-4">
             <Button
               type="button"
@@ -239,7 +189,7 @@ export const AddUserModal: React.FC<AddUserModalProps> = ({
               disabled={loading}
               className="flex-1"
             >
-              {loading ? 'Creating...' : 'Create User'}
+              {loading ? 'Updating...' : 'Update Profile'}
             </Button>
           </div>
         </form>
