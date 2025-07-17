@@ -41,33 +41,41 @@ export const AddUserModal: React.FC<AddUserModalProps> = ({
     setLoading(true);
 
     try {
-      // Create the user via Supabase Auth using signUp and then update profile
-      const { data, error: authError } = await supabase.auth.signUp({
+      // Use Admin API to create user with proper role assignment
+      const { data, error: authError } = await supabase.auth.admin.createUser({
         email: formData.email,
         password: formData.password,
-        options: {
-          data: {
-            full_name: formData.fullName,
-            role: formData.role
-          }
+        email_confirm: true, // Auto-confirm email for admin-created users
+        user_metadata: {
+          full_name: formData.fullName,
+          role: formData.role
         }
       });
 
       if (authError) throw authError;
 
-      // Update the profile with the selected role
+      // Ensure the profile is created with correct role
       if (data.user) {
         const { error: profileError } = await supabase
           .from('profiles')
-          .update({ role: formData.role })
-          .eq('user_id', data.user.id);
+          .upsert({
+            user_id: data.user.id,
+            full_name: formData.fullName,
+            email: formData.email,
+            role: formData.role
+          })
+          .select()
+          .single();
 
-        if (profileError) throw profileError;
+        if (profileError) {
+          console.error('Profile creation error:', profileError);
+          // Still show success since user was created
+        }
       }
 
       successToast(
-        "User Created Successfully!",
-        `${formData.fullName} has been created with ${formData.role} role and can now access the system.`
+        "🎉 User Created Successfully!",
+        `${formData.fullName} has been created with ${formData.role} role. They can now login immediately.`
       );
 
       // Reset form and close modal
@@ -82,8 +90,10 @@ export const AddUserModal: React.FC<AddUserModalProps> = ({
     } catch (error: any) {
       console.error('Error creating user:', error);
       errorToast(
-        "Failed to Create User",
-        error.message || "There was an issue creating the user account. Please check the details and try again."
+        "❌ User Creation Failed",
+        error.message === 'User already registered' 
+          ? "A user with this email already exists. Please use a different email address."
+          : error.message || "Unable to create user account. Please verify your admin permissions and try again."
       );
     } finally {
       setLoading(false);

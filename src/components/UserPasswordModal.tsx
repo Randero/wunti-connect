@@ -49,9 +49,8 @@ export const UserPasswordModal: React.FC<UserPasswordModalProps> = ({
     
     setLoading(true);
     try {
-      // In a real implementation, you would call your admin API endpoint
-      // For now, we'll simulate the password reset process
-      const { error } = await supabase.auth.admin.updateUserById(
+      // Use Supabase Admin API to update user password
+      const { data, error } = await supabase.auth.admin.updateUserById(
         user.user_id,
         { password: newPassword }
       );
@@ -59,15 +58,19 @@ export const UserPasswordModal: React.FC<UserPasswordModalProps> = ({
       if (error) throw error;
 
       successToast(
-        "Password Updated Successfully!",
-        `Password for ${user.full_name} has been reset. New password has been generated.`
+        "🎉 Password Updated Successfully!",
+        `New password set for ${user.full_name}. They can now login with the new credentials.`
       );
 
+      // Reset form
+      setNewPassword('');
+      setShowPassword(false);
       onClose();
     } catch (error: any) {
+      console.error('Password reset error:', error);
       errorToast(
-        "Failed to Reset Password",
-        error.message || "There was an issue resetting the user's password."
+        "❌ Password Reset Failed",
+        error.message || "Unable to reset password. Please check your admin permissions and try again."
       );
     } finally {
       setLoading(false);

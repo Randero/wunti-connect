@@ -39,39 +39,77 @@ const backgroundStyles = {
   info: "bg-blue-100 dark:bg-blue-900/30",
 }
 
-export const enhancedToast = ({ title, description, type, duration = 2000 }: EnhancedToastProps) => {
+export const enhancedToast = ({ title, description, type, duration = 3000 }: EnhancedToastProps) => {
   const Icon = toastIcons[type]
   
   const toastId = originalToast({
     title,
     description: (
-      <div className="flex items-center gap-3">
-        <div className={`rounded-full p-2 ${backgroundStyles[type]} animate-bounce`}>
-          <Icon className={`h-6 w-6 ${iconStyles[type]} animate-pulse`} />
+      <div className="flex items-center gap-4">
+        <div className={`relative rounded-full p-3 ${backgroundStyles[type]} animate-[bounce_0.6s_ease-in-out,glow_1.5s_ease-in-out_infinite_alternate]`}>
+          <Icon className={`h-7 w-7 ${iconStyles[type]} animate-[pulse_1.2s_ease-in-out_infinite]`} />
+          <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-white/20 to-transparent animate-[shimmer_2s_ease-in-out_infinite]"></div>
         </div>
-        <div className="flex flex-col">
-          <span className="font-semibold text-lg">{title}</span>
+        <div className="flex flex-col space-y-1">
+          <span className="font-bold text-lg tracking-tight animate-[slideInLeft_0.5s_cubic-bezier(0.16,1,0.3,1)]">{title}</span>
           {description && (
-            <span className="text-sm opacity-90 mt-1">{description}</span>
+            <span className="text-sm opacity-90 font-medium animate-[slideInLeft_0.6s_cubic-bezier(0.16,1,0.3,1)]">{description}</span>
           )}
         </div>
       </div>
     ),
-    className: `${toastStyles[type]} animate-[slideInFromTop_0.4s_cubic-bezier(0.16,1,0.3,1)] shadow-2xl border-2 backdrop-blur-sm`,
+    className: `${toastStyles[type]} animate-[slideInFromTop_0.6s_cubic-bezier(0.34,1.56,0.64,1),float_3s_ease-in-out_infinite] shadow-[0_25px_50px_-12px_rgba(0,0,0,0.25)] border-2 backdrop-blur-md ring-2 ring-white/10 relative overflow-hidden`,
     duration,
   })
 
-  // Auto-dismiss on touch/click
+  // Ultra-responsive auto-dismiss with visual feedback
   if (typeof window !== 'undefined') {
+    let isHovered = false
+    let touchTimer: NodeJS.Timeout
+    
     const handleInteraction = () => {
-      if (toastId) {
-        toastId.dismiss()
+      if (toastId && !isHovered) {
+        // Add exit animation
+        const toastElement = document.querySelector(`[data-toast-id="${toastId.id}"]`)
+        if (toastElement) {
+          toastElement.classList.add('animate-[slideOutToTop_0.3s_cubic-bezier(0.4,0,1,1)]')
+          setTimeout(() => toastId.dismiss(), 300)
+        } else {
+          toastId.dismiss()
+        }
       }
+    }
+
+    const handleHover = () => {
+      isHovered = true
+      clearTimeout(touchTimer)
+    }
+
+    const handleLeave = () => {
+      isHovered = false
+      touchTimer = setTimeout(handleInteraction, 500)
     }
     
     setTimeout(() => {
+      const toastElement = document.querySelector('[data-toast-id]')
+      if (toastElement) {
+        toastElement.addEventListener('mouseenter', handleHover)
+        toastElement.addEventListener('mouseleave', handleLeave)
+      }
+      
       document.addEventListener('click', handleInteraction, { once: true })
       document.addEventListener('touchstart', handleInteraction, { once: true })
+      
+      // Auto-dismiss after duration with exit animation
+      setTimeout(() => {
+        if (toastId && !isHovered) {
+          const toastEl = document.querySelector(`[data-toast-id="${toastId.id}"]`)
+          if (toastEl) {
+            toastEl.classList.add('animate-[slideOutToTop_0.4s_cubic-bezier(0.4,0,1,1)]')
+            setTimeout(() => toastId.dismiss(), 400)
+          }
+        }
+      }, duration - 500)
     }, 100)
   }
 

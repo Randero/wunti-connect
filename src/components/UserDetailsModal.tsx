@@ -28,6 +28,7 @@ import {
   Eye
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import { successToast, errorToast } from '@/components/ui/enhanced-toast';
 
 interface UserDetailsModalProps {
   user: any;
@@ -422,18 +423,29 @@ export const UserDetailsModal: React.FC<UserDetailsModalProps> = ({
                     className="pt-4 border-t"
                   >
                     <Button
-                      onClick={() => {
-                        onRoleUpdate(user.user_id, selectedRole);
-                        // Update local state immediately for UI feedback
-                        setSelectedRole(selectedRole);
-                        // Close modal after successful update
-                        setTimeout(() => {
-                          onClose();
-                        }, 1000);
+                      onClick={async () => {
+                        try {
+                          await onRoleUpdate(user.user_id, selectedRole);
+                          
+                          successToast(
+                            "🎉 Role Updated Successfully!",
+                            `${user.full_name}'s role has been updated to ${selectedRole}.`
+                          );
+                          
+                          // Close modal after successful update
+                          setTimeout(() => {
+                            onClose();
+                          }, 1500);
+                        } catch (error: any) {
+                          errorToast(
+                            "❌ Role Update Failed",
+                            error.message || "Unable to update user role. Please try again."
+                          );
+                        }
                       }}
                       className="w-full"
                     >
-                      Update Role to {selectedRole}
+                      Update Role to {selectedRole.charAt(0).toUpperCase() + selectedRole.slice(1)}
                     </Button>
                   </motion.div>
                 )}
