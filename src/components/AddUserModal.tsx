@@ -41,36 +41,30 @@ export const AddUserModal: React.FC<AddUserModalProps> = ({
     setLoading(true);
 
     try {
-      // Use Admin API to create user with proper role assignment
-      const { data, error: authError } = await supabase.auth.admin.createUser({
-        email: formData.email,
-        password: formData.password,
-        email_confirm: true, // Auto-confirm email for admin-created users
-        user_metadata: {
-          full_name: formData.fullName,
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        throw new Error('Not authenticated');
+      }
+
+      // Call Edge Function to create user
+      const response = await fetch(`https://bwcqbglfyvuvpbvaehcn.supabase.co/functions/v1/admin-create-user`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`
+        },
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password,
+          fullName: formData.fullName,
           role: formData.role
-        }
+        })
       });
 
-      if (authError) throw authError;
-
-      // Ensure the profile is created with correct role
-      if (data.user) {
-        const { error: profileError } = await supabase
-          .from('profiles')
-          .upsert({
-            user_id: data.user.id,
-            full_name: formData.fullName,
-            email: formData.email,
-            role: formData.role
-          })
-          .select()
-          .single();
-
-        if (profileError) {
-          console.error('Profile creation error:', profileError);
-          // Still show success since user was created
-        }
+      const result = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to create user');
       }
 
       successToast(

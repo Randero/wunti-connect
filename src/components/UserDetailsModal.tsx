@@ -425,6 +425,30 @@ export const UserDetailsModal: React.FC<UserDetailsModalProps> = ({
                     <Button
                       onClick={async () => {
                         try {
+                          const { data: { session } } = await supabase.auth.getSession();
+                          if (!session) {
+                            throw new Error('Not authenticated');
+                          }
+
+                          // Call Edge Function to update role
+                          const response = await fetch(`https://bwcqbglfyvuvpbvaehcn.supabase.co/functions/v1/admin-update-role`, {
+                            method: 'POST',
+                            headers: {
+                              'Content-Type': 'application/json',
+                              'Authorization': `Bearer ${session.access_token}`
+                            },
+                            body: JSON.stringify({
+                              userId: user.user_id,
+                              newRole: selectedRole
+                            })
+                          });
+
+                          const result = await response.json();
+                          
+                          if (!response.ok) {
+                            throw new Error(result.error || 'Failed to update role');
+                          }
+                          
                           await onRoleUpdate(user.user_id, selectedRole);
                           
                           successToast(

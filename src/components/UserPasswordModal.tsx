@@ -49,13 +49,29 @@ export const UserPasswordModal: React.FC<UserPasswordModalProps> = ({
     
     setLoading(true);
     try {
-      // Use Supabase Admin API to update user password
-      const { data, error } = await supabase.auth.admin.updateUserById(
-        user.user_id,
-        { password: newPassword }
-      );
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        throw new Error('Not authenticated');
+      }
 
-      if (error) throw error;
+      // Call Edge Function to update password
+      const response = await fetch(`https://bwcqbglfyvuvpbvaehcn.supabase.co/functions/v1/admin-update-password`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`
+        },
+        body: JSON.stringify({
+          userId: user.user_id,
+          newPassword
+        })
+      });
+
+      const result = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to update password');
+      }
 
       successToast(
         "🎉 Password Updated Successfully!",
