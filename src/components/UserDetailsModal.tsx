@@ -424,7 +424,12 @@ export const UserDetailsModal: React.FC<UserDetailsModalProps> = ({
                     <Button
                       onClick={() => {
                         onRoleUpdate(user.user_id, selectedRole);
+                        // Update local state immediately for UI feedback
                         setSelectedRole(selectedRole);
+                        // Close modal after successful update
+                        setTimeout(() => {
+                          onClose();
+                        }, 1000);
                       }}
                       className="w-full"
                     >
