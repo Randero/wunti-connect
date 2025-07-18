@@ -35,7 +35,7 @@ const Footer = () => {
             className="text-center"
           >
             <h3 className="text-3xl md:text-4xl font-bold mb-4">
-              Stay Connected with the Campaign
+              Stay Connected with the Movement
             </h3>
             <p className="text-xl text-gray-300 max-w-3xl mx-auto mb-8">
               Get the latest updates, event notifications, and exclusive opportunities to participate in our movement.
@@ -158,11 +158,11 @@ const Footer = () => {
             </div>
             <div className="flex items-center space-x-3">
               <Phone className="w-5 h-5 text-blue-400" />
-              <span className="text-gray-300">+234 (0) 123 456 7890</span>
+              <span className="text-gray-300">+2348060602100</span>
             </div>
             <div className="flex items-center space-x-3">
               <Mail className="w-5 h-5 text-blue-400" />
-              <span className="text-gray-300">contact@engrcombafor progress.com</span>
+              <span className="text-gray-300">officialkombatcampaigns@gmail.com</span>
             </div>
           </div>
         </motion.div>
@@ -186,7 +186,7 @@ const Footer = () => {
               transition={{ delay: 0.2, duration: 0.6 }}
               className="text-gray-300 text-sm mt-4 md:mt-0"
             >
-              Powered by modern campaign technology
+              Powered by ASI CYBER TECH 
             </motion.p>
           </div>
         </div>
