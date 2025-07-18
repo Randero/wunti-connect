@@ -27,34 +27,23 @@ const Auth = () => {
   
   const navigate = useNavigate();
 
+  const [hasRedirected, setHasRedirected] = useState(false);
+
   useEffect(() => {
-    console.log('Auth redirect check:', { 
-      user: !!user, 
-      userProfile: !!userProfile, 
-      userRole: userProfile?.role,
-      isAdmin, 
-      isModerator 
-    });
-    
-    // Only redirect if both user and profile are loaded to avoid timing issues
-    if (user && userProfile) {
-      console.log('Triggering redirect for role:', userProfile.role);
+    // Only redirect if both user and profile are loaded and we haven't redirected yet
+    if (user && userProfile && !hasRedirected) {
+      console.log('Auth redirect triggered for role:', userProfile.role);
+      setHasRedirected(true);
       
-      // Small delay to ensure state is stable
-      setTimeout(() => {
-        if (isAdmin) {
-          console.log('Redirecting to admin');
-          navigate('/admin');
-        } else if (isModerator) {
-          console.log('Redirecting to moderator');
-          navigate('/moderator');
-        } else {
-          console.log('Redirecting to dashboard');
-          navigate('/dashboard');
-        }
-      }, 100);
+      if (isAdmin) {
+        navigate('/admin', { replace: true });
+      } else if (isModerator) {
+        navigate('/moderator', { replace: true });
+      } else {
+        navigate('/dashboard', { replace: true });
+      }
     }
-  }, [user, userProfile, isAdmin, isModerator, navigate]);
+  }, [user, userProfile, isAdmin, isModerator, navigate, hasRedirected]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
