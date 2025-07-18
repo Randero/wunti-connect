@@ -164,13 +164,13 @@ const ContactSection = () => {
     {
       icon: Phone,
       title: 'Phone',
-      value: '+234 (0) 123 456 7890',
+      value: '+2348060602100',
       description: 'Available 24/7'
     },
     {
       icon: Mail,
       title: 'Email',
-      value: 'contact@aliyucambat.com',
+      value: 'officialkombatcampaigns@gmail.com',
       description: 'Response within 24hrs'
     },
     {
