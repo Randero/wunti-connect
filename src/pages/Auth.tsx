@@ -28,15 +28,28 @@ const Auth = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    console.log('Auth redirect check:', { 
+      user: !!user, 
+      userProfile: !!userProfile, 
+      userRole: userProfile?.role,
+      isAdmin, 
+      isModerator 
+    });
+    
     // Only redirect if both user and profile are loaded to avoid timing issues
     if (user && userProfile) {
+      console.log('Triggering redirect for role:', userProfile.role);
+      
       // Small delay to ensure state is stable
       setTimeout(() => {
         if (isAdmin) {
+          console.log('Redirecting to admin');
           navigate('/admin');
         } else if (isModerator) {
+          console.log('Redirecting to moderator');
           navigate('/moderator');
         } else {
+          console.log('Redirecting to dashboard');
           navigate('/dashboard');
         }
       }, 100);
