@@ -11,6 +11,7 @@ interface AuthContextType {
   signUp: (email: string, password: string, fullName: string, phoneNumber: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
   isAdmin: boolean;
+  isModerator: boolean;
   isManager: boolean;
 }
 
@@ -111,6 +112,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const isAdmin = userProfile?.role === 'admin';
+  const isModerator = userProfile?.role === 'moderator';
   const isManager = userProfile?.role === 'manager' || isAdmin;
 
   const value = {
@@ -122,6 +124,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     signUp,
     signOut,
     isAdmin,
+    isModerator,
     isManager,
   };
 

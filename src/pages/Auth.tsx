@@ -23,7 +23,7 @@ const Auth = () => {
     phoneNumber: '',
   });
 
-  const { signIn, signUp, user, userProfile, isAdmin } = useAuth();
+  const { signIn, signUp, user, userProfile, isAdmin, isModerator } = useAuth();
   
   const navigate = useNavigate();
 
@@ -34,12 +34,14 @@ const Auth = () => {
       setTimeout(() => {
         if (isAdmin) {
           navigate('/admin');
+        } else if (isModerator) {
+          navigate('/moderator');
         } else {
           navigate('/dashboard');
         }
       }, 100);
     }
-  }, [user, userProfile, isAdmin, navigate]);
+  }, [user, userProfile, isAdmin, isModerator, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
