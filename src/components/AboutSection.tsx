@@ -9,7 +9,7 @@ const AboutSection = () => {
 
   const achievements = [
     'Professional Engineer with 15+ years experience',
-    'Led infrastructure projects worth ₦50+ billion',
+    'Led infrastructure projects worth ₦80+ billion',
     'Improved a lot of communites by 300%',
     'Created Alot of employment opportunities',
     'Champion of youth empowerment programs',
@@ -125,7 +125,7 @@ const AboutSection = () => {
             >
               <div className="relative">
                 <img
-                  src="/images/theblue.png"
+                  src="/images/thewhite.jpg"
                   alt="Engr. Aliyu Muhammed Kombat"
                   className="w-full h-[600px] object-cover rounded-3xl shadow-2xl"
                 />
