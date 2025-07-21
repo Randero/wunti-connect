@@ -148,7 +148,7 @@ const AboutSection = () => {
                   transition={{ delay: 1.2, duration: 0.6 }}
                   className="absolute bottom-6 left-6 bg-white/95 backdrop-blur-sm p-4 rounded-2xl shadow-xl"
                 >
-                  <div className="text-2xl font-bold text-green-600">₦50B+</div>
+                  <div className="text-2xl font-bold text-green-600">₦80B+</div>
                   <div className="text-sm text-gray-600">Projects Delivered</div>
                 </motion.div>
               </div>
