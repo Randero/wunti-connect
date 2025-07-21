@@ -125,7 +125,7 @@ const AboutSection = () => {
             >
               <div className="relative">
                 <img
-                  src="/images/thewhite.jpg"
+                  src="/images/theblue.png"
                   alt="Engr. Aliyu Muhammed Kombat"
                   className="w-full h-[600px] object-cover rounded-3xl shadow-2xl"
                 />

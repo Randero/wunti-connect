@@ -10,7 +10,7 @@ const MeetKombatSection = () => {
   const kombatProfiles = [
     {
       id: 1,
-      image: "/images/redcapacity.jpg",
+      image: "/images/fada.png",
       title: "Visionary Leader",
       description: "Leading with integrity and a clear vision for progress. Engineering minds and building solutions that transform communities through innovative infrastructure development.",
       icon: Target,
@@ -18,7 +18,7 @@ const MeetKombatSection = () => {
     },
     {
       id: 2,
-      image: "/images/fadacapacity.jpg",
+      image: "/images/theblue.png",
       title: "Community Champion",
       description: "Dedicated to serving the people with unwavering commitment. Building bridges between diverse communities and fostering unity through inclusive governance and development.",
       icon: Users,

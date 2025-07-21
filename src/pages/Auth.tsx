@@ -32,7 +32,6 @@ const Auth = () => {
   useEffect(() => {
     // Only redirect if both user and profile are loaded and we haven't redirected yet
     if (user && userProfile && !hasRedirected) {
-      console.log('Auth redirect triggered for role:', userProfile.role);
       setHasRedirected(true);
       
       if (isAdmin) {

@@ -42,7 +42,7 @@ const NewsSection = () => {
       id: '1',
       title: 'KSFD',
       content: 'Support for people with disabilites ...',
-      image_url: '/images/kcharity3.png',
+      image_url: '/images/fada.png',
       created_at: '2024-01-15T10:00:00Z'
   
     },
@@ -50,14 +50,14 @@ const NewsSection = () => {
       id: '2',
       title: 'Youth Engagement Initiative',
       content: 'Announcing new programs to engage youth and address their concerns...',
-      image_url: '/images/kcharity4.jpg',
+      image_url: '/images/theblue.png',
       created_at: '2024-01-12T14:30:00Z'
     },
     {
       id: '3',
       title: 'Community Development Plans',
       content: 'Detailed roadmap for infrastructure and economic development in our region...',
-      image_url: '/images/kcharity2.jpg',
+      image_url: '/images/guy.png',
       created_at: '2024-01-10T09:15:00Z'
     }
   ];
