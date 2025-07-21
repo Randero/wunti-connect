@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -10,12 +10,15 @@ import { Eye, EyeOff, Mail, Lock, User, ArrowLeft, Phone } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { successToast, errorToast } from '@/components/ui/enhanced-toast';
 import { ForgotPasswordModal } from '@/components/ForgotPasswordModal';
+import { supabase } from '@/integrations/supabase/client';
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [isPasswordReset, setIsPasswordReset] = useState(false);
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -24,14 +27,23 @@ const Auth = () => {
   });
 
   const { signIn, signUp, user, userProfile, isAdmin, isModerator } = useAuth();
-  
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
   const [hasRedirected, setHasRedirected] = useState(false);
 
   useEffect(() => {
+    // Check if this is a password reset session
+    const type = searchParams.get('type');
+    if (type === 'recovery') {
+      setIsPasswordReset(true);
+      setIsLogin(true); // Show login form but with password reset fields
+      return;
+    }
+
     // Only redirect if both user and profile are loaded and we haven't redirected yet
-    if (user && userProfile && !hasRedirected) {
+    // and this is not a password reset flow
+    if (user && userProfile && !hasRedirected && !isPasswordReset) {
       setHasRedirected(true);
       
       if (isAdmin) {
@@ -42,14 +54,51 @@ const Auth = () => {
         navigate('/dashboard', { replace: true });
       }
     }
-  }, [user, userProfile, isAdmin, isModerator, navigate, hasRedirected]);
+  }, [user, userProfile, isAdmin, isModerator, navigate, hasRedirected, searchParams, isPasswordReset]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      if (isLogin) {
+      if (isPasswordReset) {
+        // Handle password reset
+        if (formData.password !== confirmPassword) {
+          errorToast(
+            "❌ Password Mismatch",
+            "Passwords do not match. Please try again."
+          );
+          setLoading(false);
+          return;
+        }
+
+        if (formData.password.length < 6) {
+          errorToast(
+            "❌ Password Too Short",
+            "Password must be at least 6 characters long."
+          );
+          setLoading(false);
+          return;
+        }
+
+        const { error } = await supabase.auth.updateUser({
+          password: formData.password
+        });
+
+        if (error) {
+          errorToast(
+            "❌ Password Reset Failed",
+            error.message
+          );
+        } else {
+          successToast(
+            "🎉 Password Updated!",
+            "Your password has been successfully updated."
+          );
+          setIsPasswordReset(false);
+          navigate('/', { replace: true });
+        }
+      } else if (isLogin) {
         const { error } = await signIn(formData.email, formData.password);
         if (error) {
           errorToast(
@@ -119,84 +168,26 @@ const Auth = () => {
               transition={{ delay: 0.2, duration: 0.5 }}
             >
               <CardTitle className="text-3xl font-bold text-gray-900 mb-2">
-                Welcome
+                {isPasswordReset ? "Reset Password" : "Welcome"}
               </CardTitle>
               <CardDescription className="text-lg text-gray-600">
-                Join the movement for change
+                {isPasswordReset ? "Enter your new password below" : "Join the movement for change"}
               </CardDescription>
             </motion.div>
           </CardHeader>
 
           <CardContent>
-            <Tabs value={isLogin ? "login" : "signup"} onValueChange={(value) => setIsLogin(value === "login")}>
-              <TabsList className="grid w-full grid-cols-2 mb-8">
-                <TabsTrigger value="login">Sign In</TabsTrigger>
-                <TabsTrigger value="signup">Sign Up</TabsTrigger>
-              </TabsList>
-
+            {isPasswordReset ? (
               <form onSubmit={handleSubmit} className="space-y-6">
-                <TabsContent value="signup" className="space-y-6 mt-0">
-                  <div className="space-y-2">
-                    <Label htmlFor="fullName">Full Name</Label>
-                    <div className="relative">
-                      <User className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                      <Input
-                        id="fullName"
-                        name="fullName"
-                        type="text"
-                        placeholder="Enter your full name"
-                        value={formData.fullName}
-                        onChange={handleInputChange}
-                        className="pl-10 h-12"
-                        required={!isLogin}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="phoneNumber">Phone Number</Label>
-                    <div className="relative">
-                      <Phone className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                      <Input
-                        id="phoneNumber"
-                        name="phoneNumber"
-                        type="tel"
-                        placeholder="Enter your phone number"
-                        value={formData.phoneNumber}
-                        onChange={handleInputChange}
-                        className="pl-10 h-12"
-                        required={!isLogin}
-                      />
-                    </div>
-                  </div>
-                </TabsContent>
-
                 <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
-                  <div className="relative">
-                    <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                    <Input
-                      id="email"
-                      name="email"
-                      type="email"
-                      placeholder="Enter your email"
-                      value={formData.email}
-                      onChange={handleInputChange}
-                      className="pl-10 h-12"
-                      required
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="password">Password</Label>
+                  <Label htmlFor="newPassword">New Password</Label>
                   <div className="relative">
                     <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                     <Input
-                      id="password"
+                      id="newPassword"
                       name="password"
                       type={showPassword ? "text" : "password"}
-                      placeholder="Enter your password"
+                      placeholder="Enter your new password"
                       value={formData.password}
                       onChange={handleInputChange}
                       className="pl-10 pr-10 h-12"
@@ -212,17 +203,22 @@ const Auth = () => {
                   </div>
                 </div>
 
-                {isLogin && (
-                  <div className="text-center">
-                    <button
-                      type="button"
-                      onClick={() => setShowForgotPassword(true)}
-                      className="text-sm text-primary hover:text-primary/80 underline"
-                    >
-                      Forgot your password?
-                    </button>
+                <div className="space-y-2">
+                  <Label htmlFor="confirmPassword">Confirm New Password</Label>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                    <Input
+                      id="confirmPassword"
+                      name="confirmPassword"
+                      type={showPassword ? "text" : "password"}
+                      placeholder="Confirm your new password"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      className="pl-10 h-12"
+                      required
+                    />
                   </div>
-                )}
+                </div>
 
                 <motion.div
                   whileHover={{ scale: 1.02 }}
@@ -233,11 +229,122 @@ const Auth = () => {
                     disabled={loading}
                     className="w-full h-12 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold text-lg"
                   >
-                    {loading ? "Please wait..." : isLogin ? "Sign In" : "Create Account"}
+                    {loading ? "Updating..." : "Update Password"}
                   </Button>
                 </motion.div>
               </form>
-            </Tabs>
+            ) : (
+              <Tabs value={isLogin ? "login" : "signup"} onValueChange={(value) => setIsLogin(value === "login")}>
+                <TabsList className="grid w-full grid-cols-2 mb-8">
+                  <TabsTrigger value="login">Sign In</TabsTrigger>
+                  <TabsTrigger value="signup">Sign Up</TabsTrigger>
+                </TabsList>
+
+                <form onSubmit={handleSubmit} className="space-y-6">
+                  <TabsContent value="signup" className="space-y-6 mt-0">
+                    <div className="space-y-2">
+                      <Label htmlFor="fullName">Full Name</Label>
+                      <div className="relative">
+                        <User className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                        <Input
+                          id="fullName"
+                          name="fullName"
+                          type="text"
+                          placeholder="Enter your full name"
+                          value={formData.fullName}
+                          onChange={handleInputChange}
+                          className="pl-10 h-12"
+                          required={!isLogin}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="phoneNumber">Phone Number</Label>
+                      <div className="relative">
+                        <Phone className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                        <Input
+                          id="phoneNumber"
+                          name="phoneNumber"
+                          type="tel"
+                          placeholder="Enter your phone number"
+                          value={formData.phoneNumber}
+                          onChange={handleInputChange}
+                          className="pl-10 h-12"
+                          required={!isLogin}
+                        />
+                      </div>
+                    </div>
+                  </TabsContent>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="email">Email</Label>
+                    <div className="relative">
+                      <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                      <Input
+                        id="email"
+                        name="email"
+                        type="email"
+                        placeholder="Enter your email"
+                        value={formData.email}
+                        onChange={handleInputChange}
+                        className="pl-10 h-12"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="password">Password</Label>
+                    <div className="relative">
+                      <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                      <Input
+                        id="password"
+                        name="password"
+                        type={showPassword ? "text" : "password"}
+                        placeholder="Enter your password"
+                        value={formData.password}
+                        onChange={handleInputChange}
+                        className="pl-10 pr-10 h-12"
+                        required
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-3 top-3 text-gray-400 hover:text-gray-600"
+                      >
+                        {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      </button>
+                    </div>
+                  </div>
+
+                  {isLogin && (
+                    <div className="text-center">
+                      <button
+                        type="button"
+                        onClick={() => setShowForgotPassword(true)}
+                        className="text-sm text-primary hover:text-primary/80 underline"
+                      >
+                        Forgot your password?
+                      </button>
+                    </div>
+                  )}
+
+                  <motion.div
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    <Button
+                      type="submit"
+                      disabled={loading}
+                      className="w-full h-12 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold text-lg"
+                    >
+                      {loading ? "Please wait..." : isLogin ? "Sign In" : "Create Account"}
+                    </Button>
+                  </motion.div>
+                </form>
+              </Tabs>
+            )}
           </CardContent>
         </Card>
 
