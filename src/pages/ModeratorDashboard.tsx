@@ -48,7 +48,7 @@ interface Analytics {
 }
 
 const ModeratorDashboard = () => {
-  const { user, userProfile, signOut, loading: authLoading, isManager } = useAuth();
+  const { user, userProfile, signOut, loading: authLoading, isManager, isModerator } = useAuth();
   
   const navigate = useNavigate();
   
@@ -68,15 +68,15 @@ const ModeratorDashboard = () => {
   const [postFilter, setPostFilter] = useState('all');
 
   useEffect(() => {
-    if (!authLoading && (!user || !isManager)) {
+    if (!authLoading && (!user || (!isManager && !isModerator))) {
       navigate('/auth');
       return;
     }
     
-    if (user && isManager) {
+    if (user && (isManager || isModerator)) {
       fetchModeratorData();
     }
-  }, [user, isManager, authLoading, navigate]);
+  }, [user, isManager, isModerator, authLoading, navigate]);
 
   const fetchModeratorData = async () => {
     setLoading(true);
@@ -197,7 +197,7 @@ const ModeratorDashboard = () => {
     );
   }
 
-  if (!user || !isManager) {
+  if (!user || (!isManager && !isModerator)) {
     return null;
   }
 
