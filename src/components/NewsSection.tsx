@@ -57,7 +57,7 @@ const NewsSection = () => {
       id: '3',
       title: 'Community Development Plans',
       content: 'Detailed roadmap for infrastructure and economic development in our region...',
-      image_url: '/images/kcharity2.png',
+      image_url: '/images/kcharity2.jpg',
       created_at: '2024-01-10T09:15:00Z'
     }
   ];
