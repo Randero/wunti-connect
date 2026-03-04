@@ -371,6 +371,7 @@ export type Database = {
       get_current_user_role: { Args: never; Returns: string }
       is_admin: { Args: never; Returns: boolean }
       is_admin_or_manager: { Args: never; Returns: boolean }
+      is_admin_or_manager_or_moderator: { Args: never; Returns: boolean }
       is_creating_user_admin: { Args: never; Returns: boolean }
       is_valid_email: { Args: { email: string }; Returns: boolean }
       is_valid_post_url: {
