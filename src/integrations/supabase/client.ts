@@ -2,8 +2,8 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || "https://bwcqbglfyvuvpbvaehcn.supabase.co";
-const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ3Y3FiZ2xmeXZ1dnBidmFlaGNuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTIzNjQyMDEsImV4cCI6MjA2Nzk0MDIwMX0.q7f9bFxvU_zKl7P4CMaRhqt_zPsMQzoT0IKsO95xGB0";
+const SUPABASE_URL = "https://parerglgduqtyiopkjlq.supabase.co";
+const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBhcmVyZ2xnZHVxdHlpb3BramxxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2Nzc5NDEsImV4cCI6MjA4NzI1Mzk0MX0.DquiTe0pil2RljyDAc0Y98gsmLTDP4lNlg3cbZhwPWw";
 
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";
@@ -13,15 +13,5 @@ export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABL
     storage: localStorage,
     persistSession: true,
     autoRefreshToken: true,
-    detectSessionInUrl: true,
-    flowType: 'pkce' // Use PKCE for enhanced security
-  },
-  global: {
-    headers: {
-      'X-Client-Info': 'supabase-js-web'
-    }
-  },
-  db: {
-    schema: 'public'
   }
 });

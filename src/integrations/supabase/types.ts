@@ -7,10 +7,10 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instanciate createClient with right options
+  // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "12.2.3 (519615d)"
+    PostgrestVersion: "14.1"
   }
   public: {
     Tables: {
@@ -87,7 +87,7 @@ export type Database = {
           created_at: string
           email: string
           id: string
-          ip_address: unknown | null
+          ip_address: unknown
           message: string
           name: string
           phone: string | null
@@ -98,7 +98,7 @@ export type Database = {
           created_at?: string
           email: string
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           message: string
           name: string
           phone?: string | null
@@ -109,7 +109,7 @@ export type Database = {
           created_at?: string
           email?: string
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           message?: string
           name?: string
           phone?: string | null
@@ -362,50 +362,23 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      calculate_user_level: {
-        Args: { user_id: string }
-        Returns: number
-      }
-      can_user_post: {
-        Args: { user_id: string }
-        Returns: boolean
-      }
+      calculate_user_level: { Args: { user_id: string }; Returns: number }
+      can_user_post: { Args: { user_id: string }; Returns: boolean }
       check_contact_rate_limit: {
         Args: { client_ip: unknown }
         Returns: boolean
       }
-      get_current_user_role: {
-        Args: Record<PropertyKey, never>
-        Returns: string
-      }
-      is_admin: {
-        Args: Record<PropertyKey, never>
-        Returns: boolean
-      }
-      is_admin_or_manager: {
-        Args: Record<PropertyKey, never>
-        Returns: boolean
-      }
-      is_creating_user_admin: {
-        Args: Record<PropertyKey, never>
-        Returns: boolean
-      }
-      is_valid_email: {
-        Args: { email: string }
-        Returns: boolean
-      }
+      get_current_user_role: { Args: never; Returns: string }
+      is_admin: { Args: never; Returns: boolean }
+      is_admin_or_manager: { Args: never; Returns: boolean }
+      is_creating_user_admin: { Args: never; Returns: boolean }
+      is_valid_email: { Args: { email: string }; Returns: boolean }
       is_valid_post_url: {
-        Args: { url: string; platform: string }
+        Args: { platform: string; url: string }
         Returns: boolean
       }
-      request_password_reset: {
-        Args: { user_email: string }
-        Returns: Json
-      }
-      sanitize_html: {
-        Args: { input_text: string }
-        Returns: string
-      }
+      request_password_reset: { Args: { user_email: string }; Returns: Json }
+      sanitize_html: { Args: { input_text: string }; Returns: string }
     }
     Enums: {
       [_ in never]: never
