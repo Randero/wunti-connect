@@ -90,7 +90,7 @@ const HeroSection = () => {
               transition={{ delay: 0.4, duration: 0.8 }}
               className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6 leading-tight"
             >
-              Engr. Aliyu Muhammed
+              Dr. Bala Maijama'a Wunti
               <motion.span 
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
@@ -107,7 +107,8 @@ const HeroSection = () => {
               transition={{ delay: 0.6, duration: 0.6 }}
               className="text-xl text-blue-100 mb-8 max-w-2xl"
             >
-              Engineering progress, building communities, and creating opportunities for every citizen. Join the movement for real change.
+              Powering Nigeria's energy future, uplifting communities, and creating opportunities for every citizen of Bauchi. Join the movement for real and lasting change.
+
             </motion.p>
 
             <motion.div
