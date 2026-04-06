@@ -8,12 +8,12 @@ const AboutSection = () => {
   const isInView = useInView(ref, { once: true });
 
   const achievements = [
-    'Professional Engineer with 15+ years experience',
+    'Oil & Gas Technocrat with 30+ years of experience'
     'Led infrastructure projects worth ₦80+ billion',
     'Improved a lot of communites by 300%',
-    'Created Alot of employment opportunities',
-    'Champion of youth empowerment programs',
-    'Advocate for transparent governance',
+    'Champion of youth empowerment and job creation across Bauchi State and northern Nigeria',
+    'Trained 200+ Nigerian youths with career-ready skills through the Wunti Al-Khair Foundation',
+    'Advocate for transparent, inclusive, and accountable governance',
   ];
 
   const visionPoints = [
@@ -77,9 +77,11 @@ const AboutSection = () => {
                 transition={{ delay: 0.4, duration: 0.6 }}
                 className="text-lg text-gray-600 mb-8 leading-relaxed"
               >
-                Engr. Aliyu Muhammed Kombat brings decades of engineering excellence and community leadership 
-                to serve the people. With a proven track record of delivering results and a vision for 
-                sustainable development, he's ready to engineer a better future for all.
+                Dr. Bala Maijama'a Wunti brings over three decades of oil and gas expertise,
+                strategic leadership, and genuine community service to the people of Bauchi State.
+                With a proven track record of delivering results on both the national and global stage 
+                and a heart deeply rooted in the welfare of ordinary citizens,
+                he is ready to transform Bauchi into a state where every person truly thrives..
               </motion.p>
 
               {/* Achievements List */}
@@ -126,7 +128,7 @@ const AboutSection = () => {
               <div className="relative">
                 <img
                   src="/images/thewhite.jpg"
-                  alt="Engr. Aliyu Muhammed Kombat"
+                  alt="Dr. Bala Maijama'a Wunti"
                   className="w-full h-[600px] object-cover rounded-3xl shadow-2xl"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-blue-900/20 to-transparent rounded-3xl" />
@@ -138,7 +140,7 @@ const AboutSection = () => {
                   transition={{ delay: 1, duration: 0.6 }}
                   className="absolute top-6 right-6 bg-white/95 backdrop-blur-sm p-4 rounded-2xl shadow-xl"
                 >
-                  <div className="text-2xl font-bold text-blue-600">15+</div>
+                  <div className="text-2xl font-bold text-blue-600">30+</div>
                   <div className="text-sm text-gray-600">Years Experience</div>
                 </motion.div>
 
