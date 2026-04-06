@@ -29,6 +29,12 @@ const HeroSection = () => {
       title: "Engineering Excellence",
       description: "Technical expertise for practical solutions"
     }
+    {
+      id: 4,
+      src: "/images/guy2.png",
+      title: "Engineering Excellence",
+      description: "Technical expertise for practical solutions"
+    }
   ];
 
   useEffect(() => {
