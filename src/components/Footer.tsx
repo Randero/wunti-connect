@@ -70,7 +70,7 @@ const Footer = () => {
                 <span className="text-white font-bold text-lg">KC</span>
               </div>
               <div>
-                <h2 className="text-2xl font-bold">Engr. Aliyu Muhammed Kombat</h2>
+                <h2 className="text-2xl font-bold">Dr. Bala Maijama'a Wunti</h2>
                 <p className="text-blue-300">Building Tomorrow Together</p>
               </div>
             </div>
@@ -154,15 +154,15 @@ const Footer = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="flex items-center space-x-3">
               <MapPin className="w-5 h-5 text-blue-400" />
-              <span className="text-gray-300">Campaign Headquarters, Abuja, Nigeria</span>
+              <span className="text-gray-300">Campaign Headquarters, Bauchi, Nigeria</span>
             </div>
             <div className="flex items-center space-x-3">
               <Phone className="w-5 h-5 text-blue-400" />
-              <span className="text-gray-300">+2348060602100</span>
+              <span className="text-gray-300">+2348060602100, +2348137006617</span>
             </div>
             <div className="flex items-center space-x-3">
               <Mail className="w-5 h-5 text-blue-400" />
-              <span className="text-gray-300">officialkombatcampaigns@gmail.com</span>
+              <span className="text-gray-300">officialbalawunticampaigns@gmail.com</span>
             </div>
           </div>
         </motion.div>
@@ -178,7 +178,7 @@ const Footer = () => {
               transition={{ duration: 0.6 }}
               className="text-gray-300 text-sm"
             >
-              © 2024 Engr. Aliyu Muhammed Kombat Campaign. All rights reserved.
+              © 2024 Bala Wunti Campaign. All rights reserved.
             </motion.p>
             <motion.p
               initial={{ opacity: 0 }}
@@ -186,7 +186,7 @@ const Footer = () => {
               transition={{ delay: 0.2, duration: 0.6 }}
               className="text-gray-300 text-sm mt-4 md:mt-0"
             >
-              Powered by ASI CYBER TECH 
+              Powered by AV CYBER TECH 
             </motion.p>
           </div>
         </div>
