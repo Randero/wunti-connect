@@ -76,8 +76,8 @@ const MeetKombatSection = () => {
             transition={{ delay: 0.4, duration: 0.8 }}
             className="text-4xl md:text-6xl font-bold text-white mb-6"
           >
-            Dr. Bala Maijama'a Wunti
-            <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">Kombat</span>
+            Dr. Bala Maijama'a
+            <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">Wunti</span>
           </motion.h2>
           
           <motion.p
