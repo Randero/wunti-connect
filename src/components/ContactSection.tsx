@@ -164,20 +164,20 @@ const ContactSection = () => {
     {
       icon: Phone,
       title: 'Phone',
-      value: '+2348060602100',
+      value: '+2348060602100' '+2348137006617,
       description: 'Available 24/7'
     },
     {
       icon: Mail,
       title: 'Email',
-      value: 'officialkombatcampaigns@gmail.com',
+      value: 'officialbalawunticampaigns@gmail.com',
       description: 'Response within 24hrs'
     },
     {
       icon: MapPin,
       title: 'Office',
       value: 'Campaign Headquarters',
-      description: 'Abuja, Nigeria'
+      description: 'Bauchi, Nigeria'
     }
   ];
 
