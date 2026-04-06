@@ -29,6 +29,12 @@ const HeroSection = () => {
       title: "Engineering Excellence",
       description: "Technical expertise for practical solutions"
     }
+     {
+      id: 4,
+      src: "/images/guy2.png",
+      title: "Engineering Excellence",
+      description: "Global expertise, local impact."
+    }
   ];
 
   useEffect(() => {
@@ -90,14 +96,14 @@ const HeroSection = () => {
               transition={{ delay: 0.4, duration: 0.8 }}
               className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6 leading-tight"
             >
-              Dr. Bala Maijama'a Wunti
+              Dr. Bala Maijama'a 
               <motion.span 
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 0.8, duration: 0.8, type: "spring" }}
                 className="block font-extrabold text-yellow-400"
               >
-                Kombat
+                Wunti
               </motion.span>
             </motion.h1>
 
