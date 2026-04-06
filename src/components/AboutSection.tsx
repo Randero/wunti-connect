@@ -8,7 +8,7 @@ const AboutSection = () => {
   const isInView = useInView(ref, { once: true });
 
   const achievements = [
-    'Oil & Gas Technocrat with 30+ years of experience'
+    'Oil & Gas Technocrat with 30+ years of experience',
     'Led infrastructure projects worth ₦80+ billion',
     'Improved a lot of communites by 300%',
     'Champion of youth empowerment and job creation across Bauchi State and northern Nigeria',
@@ -81,7 +81,7 @@ const AboutSection = () => {
                 strategic leadership, and genuine community service to the people of Bauchi State.
                 With a proven track record of delivering results on both the national and global stage 
                 and a heart deeply rooted in the welfare of ordinary citizens,
-                he is ready to transform Bauchi into a state where every person truly thrives..
+                he is ready to transform Bauchi into a state where every person truly thrives.,
               </motion.p>
 
               {/* Achievements List */}
