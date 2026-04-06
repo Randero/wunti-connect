@@ -67,7 +67,7 @@ const MeetKombatSection = () => {
             className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-500/20 to-purple-500/20 backdrop-blur-sm border border-blue-400/30 text-blue-300 rounded-full font-semibold mb-8"
           >
             <User className="w-5 h-5 mr-2" />
-            Meet Kombat
+            Meet Bala Wunti
           </motion.div>
           
           <motion.h2
@@ -76,7 +76,7 @@ const MeetKombatSection = () => {
             transition={{ delay: 0.4, duration: 0.8 }}
             className="text-4xl md:text-6xl font-bold text-white mb-6"
           >
-            Engr. Aliyu Muhammed
+            Dr. Bala Maijama'a Wunti
             <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">Kombat</span>
           </motion.h2>
           
